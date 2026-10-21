@@ -84,45 +84,87 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
 
   const googleButtonContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Keep input synchronized when prop changes
+  useEffect(() => {
+    setClientIdInput(googleClientId);
+  }, [googleClientId]);
+
   // Synchronize Google Identity Services SDK button if available & client ID configured
   useEffect(() => {
     if (user || typeof window === 'undefined') return;
 
-    const win = window as WindowWithGoogle;
-    const gsi = win.google?.accounts?.id;
+    let isMounted = true;
+    let attempts = 0;
+    const maxAttempts = 40; // 4 seconds max
 
-    if (gsi && googleClientId.trim() && googleButtonContainerRef.current) {
-      try {
-        gsi.initialize({
-          client_id: googleClientId.trim(),
-          callback: (response: GoogleCredentialResponse) => {
-            if (onCredentialResponse) {
-              onCredentialResponse(response);
-            }
-          },
-        });
+    const tryInitGsi = () => {
+      if (!isMounted) return false;
+      const win = window as WindowWithGoogle;
+      const gsi = win.google?.accounts?.id;
 
-        // Clear previous button content
-        googleButtonContainerRef.current.innerHTML = '';
+      if (gsi && googleClientId.trim() && googleButtonContainerRef.current) {
+        try {
+          gsi.initialize({
+            client_id: googleClientId.trim(),
+            callback: (response: GoogleCredentialResponse) => {
+              if (onCredentialResponse) {
+                onCredentialResponse(response);
+              }
+            },
+          });
 
-        // Render official Google button
-        gsi.renderButton(googleButtonContainerRef.current, {
-          theme: 'outline',
-          size: 'large',
-          text: 'continue_with',
-          shape: 'pill',
-          width: 340,
-        });
-      } catch (err) {
-        console.warn('Google Identity Services renderButton failed:', err);
+          // Clear previous button content
+          googleButtonContainerRef.current.innerHTML = '';
+
+          // Render official Google button
+          gsi.renderButton(googleButtonContainerRef.current, {
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'pill',
+            width: 340,
+          });
+          return true;
+        } catch (err) {
+          console.warn('Google Identity Services renderButton failed:', err);
+          return false;
+        }
       }
+      return false;
+    };
+
+    if (tryInitGsi()) {
+      return () => {
+        isMounted = false;
+      };
     }
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (tryInitGsi() || attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [user, googleClientId, onCredentialResponse]);
 
   const handleSaveClientId = (e: React.FormEvent) => {
     e.preventDefault();
     if (onUpdateGoogleClientId) {
       onUpdateGoogleClientId(clientIdInput.trim());
+      setClientSavedToast(true);
+      setTimeout(() => setClientSavedToast(false), 2500);
+    }
+  };
+
+  const handleClearClientId = () => {
+    if (onUpdateGoogleClientId) {
+      setClientIdInput('');
+      onUpdateGoogleClientId('');
       setClientSavedToast(true);
       setTimeout(() => setClientSavedToast(false), 2500);
     }
@@ -546,15 +588,50 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
                   >
                     Save Client ID
                   </button>
+                  {googleClientId && (
+                    <button
+                      type="button"
+                      className="btn-clear-client-id"
+                      onClick={handleClearClientId}
+                      data-testid="btn-clear-client-id"
+                    >
+                      Clear
+                    </button>
+                  )}
                   {clientSavedToast && (
                     <span className="client-saved-toast" role="status">
-                      ✓ Client ID saved!
+                      ✓ Client ID updated!
                     </span>
                   )}
                 </div>
-                <div className="origin-reminder">
-                  <span>Authorized JavaScript Origin:</span>{' '}
-                  <code>http://localhost:5173</code>
+                <div className="google-setup-steps">
+                  <span className="setup-steps-title">Google Cloud Console Setup Checklist:</span>
+                  <ol className="setup-steps-list">
+                    <li>
+                      Go to{' '}
+                      <a
+                        href="https://console.cloud.google.com/apis/credentials"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="setup-external-link"
+                      >
+                        Google Cloud Console → APIs & Services → Credentials ↗
+                      </a>
+                    </li>
+                    <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong>.</li>
+                    <li>Select Application type: <strong>Web application</strong>.</li>
+                    <li>
+                      Under <strong>Authorized JavaScript origins</strong>, add:
+                      <br />
+                      <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
+                    </li>
+                    <li>
+                      Under <strong>Authorized redirect URIs</strong>, add:
+                      <br />
+                      <code>http://localhost:5173</code>
+                    </li>
+                    <li>Paste the generated Client ID above or into your local <code>.env</code> file.</li>
+                  </ol>
                 </div>
               </form>
             )}

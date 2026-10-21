@@ -92,6 +92,29 @@ describe('GoogleLoginPage Component', () => {
       );
     });
 
+    it('allows clearing the Google OAuth Client ID when configured', () => {
+      render(
+        <GoogleLoginPage
+          user={null}
+          googleClientId="active-client-id.apps.googleusercontent.com"
+          onUpdateGoogleClientId={mockUpdateGoogleClientId}
+          onLoginWithGoogle={mockLoginWithGoogle}
+          onLogout={mockLogout}
+          onSyncData={mockSyncData}
+          onBack={mockBack}
+        />
+      );
+
+      // Open configuration panel
+      const toggleConfigBtn = screen.getByTestId('toggle-client-config-btn');
+      fireEvent.click(toggleConfigBtn);
+
+      const clearBtn = screen.getByTestId('btn-clear-client-id');
+      fireEvent.click(clearBtn);
+
+      expect(mockUpdateGoogleClientId).toHaveBeenCalledWith('');
+    });
+
     it('triggers onLoginWithGoogle when clicking Continue with Google', () => {
       render(
         <GoogleLoginPage

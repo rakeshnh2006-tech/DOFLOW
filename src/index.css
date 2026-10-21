@@ -7110,21 +7110,78 @@ kbd {
   background-color: var(--color-accent-hover);
 }
 
+.btn-clear-client-id {
+  padding: 8px 14px;
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  border: var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-clear-client-id:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, #ef4444);
+}
+
 .client-saved-toast {
   font-size: 0.75rem;
   color: var(--status-completed-text);
   font-weight: 600;
 }
 
-.origin-reminder {
-  font-size: 0.6875rem;
-  color: var(--color-text-muted);
+.google-setup-steps {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-subtle);
+  border: var(--border-subtle);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.setup-steps-title {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.setup-steps-list {
+  margin: 0;
+  padding-left: 18px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 6px;
-  flex-wrap: wrap;
-  padding-top: 6px;
-  border-top: var(--border-subtle);
+}
+
+.setup-steps-list strong {
+  color: var(--color-text-primary);
+}
+
+.setup-steps-list code {
+  background-color: var(--color-surface);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.7188rem;
+  color: var(--color-accent);
+  border: var(--border-subtle);
+}
+
+.setup-external-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.setup-external-link:hover {
+  color: var(--color-accent-hover);
 }
 
 /* Custom Account Expander */
