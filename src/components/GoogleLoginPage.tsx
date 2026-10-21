@@ -624,12 +624,17 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
                       Under <strong>Authorized JavaScript origins</strong>, add:
                       <br />
                       <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
+                      <br />
+                      <small style={{ color: 'var(--color-text-muted)' }}>
+                        ⚠️ Do not include a trailing slash (e.g. <code>http://localhost:5173/</code> will fail).
+                      </small>
                     </li>
                     <li>
                       Under <strong>Authorized redirect URIs</strong>, add:
                       <br />
-                      <code>http://localhost:5173</code>
+                      <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
                     </li>
+                    <li>Click <strong>Save</strong> and wait 1–2 minutes for Google's servers to propagate.</li>
                     <li>Paste the generated Client ID above or into your local <code>.env</code> file.</li>
                   </ol>
                 </div>
