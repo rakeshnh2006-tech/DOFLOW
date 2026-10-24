@@ -15,6 +15,8 @@ import { TermsConditionsPage } from './components/TermsConditionsPage';
 import { GoogleLoginPage } from './components/GoogleLoginPage';
 import { SettingsModal } from './components/SettingsModal';
 import { RunningTimerSettingModal } from './components/RunningTimerSettingModal';
+import { CoinHistoryModal } from './components/CoinHistoryModal';
+import { StudentPerksMarketplace } from './components/StudentPerksMarketplace';
 import { useTasks } from './hooks/useTasks';
 import { useProductivityStats } from './hooks/useProductivityStats';
 import { usePreferences } from './hooks/usePreferences';
@@ -24,6 +26,9 @@ import { useHabits } from './hooks/useHabits';
 import { useGoals } from './hooks/useGoals';
 import { useFlowIntelligence } from './hooks/useFlowIntelligence';
 import { useAuth } from './hooks/useAuth';
+import { useCoins } from './hooks/useCoins';
+import { usePerks } from './hooks/usePerks';
+import { usePartnerOffers } from './hooks/usePartnerOffers';
 import { clearAllDoflowData } from './utils/dataManagement';
 import { DEFAULT_PREFERENCES } from './types/settings';
 import { DEFAULT_DAILY_GOALS } from './utils/goalsStorage';
@@ -33,6 +38,20 @@ import type { AppView } from './components/Header';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('timer');
+  const authState = useAuth();
+  const coinsState = useCoins({ userId: authState.user?.id });
+  const perksState = usePerks({
+    userId: authState.user?.id,
+    onRedeemSuccess: () => {
+      coinsState.refreshCoins();
+    },
+  });
+  const partnerState = usePartnerOffers({
+    userId: authState.user?.id,
+    onRedeemSuccess: () => {
+      coinsState.refreshCoins();
+    },
+  });
   const taskState = useTasks();
   const statsState = useProductivityStats({ tasks: taskState.tasks });
   const preferencesState = usePreferences();
@@ -54,7 +73,6 @@ export const App: React.FC = () => {
     habits: habitsState.habitsWithStreaks,
     plannerTasks: plannerState.plannedTasks,
   });
-  const authState = useAuth();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRunningDurationModalOpen, setIsRunningDurationModalOpen] = useState(false);
@@ -135,12 +153,14 @@ export const App: React.FC = () => {
   const handleTimerComplete = useCallback(
     (mode: TimerMode, durationMs?: number) => {
       // Default to 25 min if durationMs not provided
-      const record = statsState.recordCompletedSession(mode, durationMs ?? 25 * 60 * 1000);
+      const resolvedDurationMs = durationMs ?? 25 * 60 * 1000;
+      const record = statsState.recordCompletedSession(mode, resolvedDurationMs);
       if (record && record.mode === 'focus') {
         intelligenceState.promptSessionReflection(record.id);
+        coinsState.completeSession(mode, resolvedDurationMs);
       }
     },
-    [statsState, intelligenceState]
+    [statsState, intelligenceState, coinsState]
   );
 
   const handleClearAllData = useCallback(() => {
@@ -192,6 +212,11 @@ export const App: React.FC = () => {
         isSoundscapePlaying={soundscapeState.isPlaying}
         soundscapeEnabled={soundscapeState.enabled}
         user={authState.user}
+        coinBalance={coinsState.balance}
+        isCoinsLoading={coinsState.isLoading}
+        onOpenCoinHistory={coinsState.openHistoryModal}
+        rewardToast={coinsState.rewardToast}
+        onClearRewardToast={coinsState.clearRewardToast}
       />
 
       <div style={{ display: currentView === 'timer' ? 'block' : 'none' }}>
@@ -202,6 +227,8 @@ export const App: React.FC = () => {
           onComplete={handleTimerComplete}
           onStatusChange={setTimerStatus}
           onModeChange={setTimerMode}
+          onSessionStart={coinsState.startSession}
+          onSessionReset={coinsState.resetSession}
           resetTimerRef={resetTimerRef}
         />
 
@@ -245,6 +272,20 @@ export const App: React.FC = () => {
           preferences={preferencesState.preferences}
           onNavigateToTimer={() => setCurrentView('timer')}
           onSelectActiveTask={taskState.selectActiveTask}
+        />
+      )}
+
+      {currentView === 'perks' && (
+        <StudentPerksMarketplace
+          coinBalance={coinsState.balance}
+          isAuthenticated={authState.user !== null}
+          user={authState.user}
+          currentTheme={preferencesState.preferences.theme}
+          onSetTheme={preferencesState.setTheme}
+          onOpenHistory={coinsState.openHistoryModal}
+          onNavigateToLogin={() => setCurrentView('login')}
+          perksState={perksState}
+          partnerState={partnerState}
         />
       )}
 
@@ -328,6 +369,14 @@ export const App: React.FC = () => {
         soundscapeEnabled={soundscapeState.enabled}
         onToggleSoundscapeEnabled={soundscapeState.setEnabled}
         onNavigateLegal={setCurrentView}
+        unlockedThemes={perksState.ownedPerkIds
+          .map((id) => {
+            if (id === 'theme_nordic') return 'nordic';
+            if (id === 'theme_forest') return 'forest';
+            if (id === 'theme_sunset') return 'sunset';
+            return '';
+          })
+          .filter(Boolean)}
       />
 
       {/* Confirmation prompt when updating durations during an active timer session */}
@@ -343,6 +392,18 @@ export const App: React.FC = () => {
         sessionId={intelligenceState.pendingReflectionSessionId}
         onSave={intelligenceState.addReflection}
         onSkip={intelligenceState.skipSessionReflection}
+      />
+
+      {/* Doflow Coins Ledger History Modal */}
+      <CoinHistoryModal
+        isOpen={coinsState.isHistoryModalOpen}
+        onClose={coinsState.closeHistoryModal}
+        balance={coinsState.balance}
+        lifetimeEarned={coinsState.lifetimeEarned}
+        lifetimeSpent={coinsState.lifetimeSpent}
+        transactions={coinsState.transactions}
+        isAuthenticated={authState.user !== null}
+        onLoginPrompt={() => setCurrentView('login')}
       />
     </div>
   );

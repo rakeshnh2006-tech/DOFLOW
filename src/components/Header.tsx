@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ThemeMode } from '../types/settings';
 import type { AuthUser } from '../types/auth';
+import { CoinBalanceBadge } from './CoinBalanceBadge';
 
 export type AppView =
   | 'timer'
@@ -10,6 +11,7 @@ export type AppView =
   | 'habits'
   | 'goals'
   | 'intelligence'
+  | 'perks'
   | 'privacy'
   | 'terms'
   | 'login';
@@ -24,6 +26,11 @@ interface HeaderProps {
   activeSoundscapeName?: string;
   soundscapeEnabled?: boolean;
   user?: AuthUser | null;
+  coinBalance?: number;
+  isCoinsLoading?: boolean;
+  onOpenCoinHistory?: () => void;
+  rewardToast?: { message: string; coins: number; id: number } | null;
+  onClearRewardToast?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -35,6 +42,11 @@ export const Header: React.FC<HeaderProps> = ({
   isSoundscapePlaying = false,
   soundscapeEnabled = true,
   user = null,
+  coinBalance = 0,
+  isCoinsLoading = false,
+  onOpenCoinHistory,
+  rewardToast,
+  onClearRewardToast,
 }) => {
   return (
     <header className="app-header" role="banner">
@@ -107,6 +119,15 @@ export const Header: React.FC<HeaderProps> = ({
             data-testid="nav-intelligence"
           >
             Intelligence
+          </button>
+          <button
+            type="button"
+            className={`nav-tab-btn ${currentView === 'perks' ? 'active' : ''}`}
+            onClick={() => onNavigate('perks')}
+            aria-selected={currentView === 'perks'}
+            data-testid="nav-perks"
+          >
+            Perks
           </button>
           {soundscapeEnabled && (
             <button
@@ -199,6 +220,17 @@ export const Header: React.FC<HeaderProps> = ({
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
           </button>
+        )}
+
+        {onOpenCoinHistory && (
+          <CoinBalanceBadge
+            balance={coinBalance}
+            isLoading={isCoinsLoading}
+            isAuthenticated={user !== null}
+            onOpenHistory={onOpenCoinHistory}
+            rewardToast={rewardToast}
+            onClearToast={onClearRewardToast}
+          />
         )}
 
         {onNavigate &&

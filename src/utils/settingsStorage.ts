@@ -41,8 +41,9 @@ export function loadPreferencesFromStorage(): UserPreferences {
       ? parsed.longBreakDurationMinutes
       : DEFAULT_PREFERENCES.longBreakDurationMinutes;
 
-    const theme = parsed.theme === 'dark' || parsed.theme === 'light'
-      ? parsed.theme
+    const validThemes: string[] = ['light', 'dark', 'nordic', 'forest', 'sunset'];
+    const theme = validThemes.includes(parsed.theme)
+      ? (parsed.theme as UserPreferences['theme'])
       : DEFAULT_PREFERENCES.theme;
 
     const soundEnabled = typeof parsed.soundEnabled === 'boolean'

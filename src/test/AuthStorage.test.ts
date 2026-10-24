@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   AUTH_USER_STORAGE_KEY,
   GOOGLE_CLIENT_ID_STORAGE_KEY,
@@ -17,6 +17,11 @@ import type { GoogleJwtPayload } from '../types/auth';
 describe('authStorage utility', () => {
   beforeEach(() => {
     localStorage.clear();
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('returns null when no user is stored in localStorage', () => {

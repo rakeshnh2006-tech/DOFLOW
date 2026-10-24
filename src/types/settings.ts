@@ -1,4 +1,4 @@
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'nordic' | 'forest' | 'sunset';
 
 export interface UserPreferences {
   focusDurationMinutes: number;

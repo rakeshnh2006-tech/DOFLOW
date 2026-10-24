@@ -52,6 +52,14 @@ export interface FocusTimerProps {
    */
   onStatusChange?: (status: TimerStatus) => void;
   /**
+   * Optional callback when focus session starts.
+   */
+  onSessionStart?: (mode: TimerMode, durationMs: number) => void;
+  /**
+   * Optional callback when focus session is reset/abandoned.
+   */
+  onSessionReset?: () => void;
+  /**
    * Optional ref to expose reset callback.
    */
   resetTimerRef?: React.MutableRefObject<((newDuration?: number) => void) | null>;
@@ -66,6 +74,8 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
   onComplete,
   onModeChange,
   onStatusChange,
+  onSessionStart,
+  onSessionReset,
   resetTimerRef,
 }) => {
   // Configured durations per mode with fallback to standard Pomodoro defaults
@@ -134,6 +144,10 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
   // Switch to a new mode
   const executeModeSwitch = useCallback(
     (targetMode: TimerMode) => {
+      if (status === 'running' || status === 'paused') {
+        onSessionReset?.();
+      }
+
       // If user chooses long break, reset the consecutive cycle counter
       if (targetMode === 'longBreak') {
         setConsecutiveFocusSessions(0);
@@ -145,7 +159,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
       reset(newDuration);
       onModeChange?.(targetMode);
     },
-    [onModeChange, reset, resolvedDurations]
+    [onModeChange, onSessionReset, reset, resolvedDurations, status]
   );
 
   // Handler for user clicking a mode tab
@@ -176,11 +190,22 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
     setPendingModeSwitch(null);
   }, []);
 
-  // Reset current mode's duration
+  // Start current mode's duration and notify session start
+  const handleStart = useCallback(() => {
+    if (status === 'idle') {
+      onSessionStart?.(currentMode, currentDuration);
+    }
+    start();
+  }, [currentDuration, currentMode, onSessionStart, start, status]);
+
+  // Reset current mode's duration and notify session reset
   const handleReset = useCallback(() => {
+    if (status === 'running' || status === 'paused') {
+      onSessionReset?.();
+    }
     reset(currentDuration);
     setLastCompletedSession(null);
-  }, [currentDuration, reset]);
+  }, [currentDuration, onSessionReset, reset, status]);
 
   // Keep document title synchronized with mode & time
   useEffect(() => {
@@ -213,7 +238,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
       if (e.code === 'Space') {
         e.preventDefault();
         if (status === 'idle') {
-          start();
+          handleStart();
         } else if (status === 'running') {
           pause();
         } else if (status === 'paused') {
@@ -231,7 +256,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleReset, pause, pendingModeSwitch, resume, start, status]);
+  }, [handleReset, handleStart, pause, pendingModeSwitch, resume, status]);
 
   const formattedCurrentDuration = useMemo(
     () => formatMilliseconds(currentDuration).display,
@@ -290,7 +315,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
             status={status}
             mode={currentMode}
             formattedDuration={formattedCurrentDuration}
-            onStart={start}
+            onStart={handleStart}
             onPause={pause}
             onResume={resume}
             onReset={handleReset}

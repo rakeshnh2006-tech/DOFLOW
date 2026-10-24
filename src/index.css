@@ -108,6 +108,141 @@
   --shadow-modal: 0 20px 48px -10px rgba(0, 0, 0, 0.6), 0 4px 14px -2px rgba(0, 0, 0, 0.3);
 }
 
+/* Nordic Midnight Theme */
+[data-theme="nordic"] {
+  --color-bg: #0B1120;
+  --color-surface: #152033;
+  --color-surface-hover: #1E2D45;
+  --color-surface-subtle: #19273C;
+
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-inverted: #0B1120;
+
+  --color-accent: #38BDF8;
+  --color-accent-hover: #0EA5E9;
+  --color-accent-subtle: rgba(56, 189, 248, 0.14);
+  --color-accent-border: rgba(56, 189, 248, 0.4);
+  --color-accent-ring: rgba(56, 189, 248, 0.3);
+
+  --status-idle-bg: #1B263B;
+  --status-idle-dot: #64748B;
+  --status-idle-text: #94A3B8;
+
+  --status-running-bg: rgba(56, 189, 248, 0.15);
+  --status-running-dot: #38BDF8;
+  --status-running-text: #7DD3FC;
+
+  --status-paused-bg: rgba(234, 179, 8, 0.14);
+  --status-paused-dot: #EAB308;
+  --status-paused-text: #FDE047;
+
+  --status-completed-bg: rgba(45, 212, 191, 0.15);
+  --status-completed-dot: #2DD4BF;
+  --status-completed-text: #99F6E4;
+
+  --color-danger: #F87171;
+  --color-danger-subtle: rgba(248, 113, 113, 0.14);
+
+  --border-subtle: 1px solid #1E293B;
+  --border-card: 1px solid #23334D;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 8px 32px -6px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 20px 48px -10px rgba(0, 0, 0, 0.65);
+}
+
+/* Emerald Forest Theme */
+[data-theme="forest"] {
+  --color-bg: #091510;
+  --color-surface: #10231B;
+  --color-surface-hover: #173227;
+  --color-surface-subtle: #132A20;
+
+  --color-text-primary: #ECFDF5;
+  --color-text-secondary: #A7F3D0;
+  --color-text-muted: #6EE7B7;
+  --color-text-inverted: #091510;
+
+  --color-accent: #10B981;
+  --color-accent-hover: #059669;
+  --color-accent-subtle: rgba(16, 185, 129, 0.15);
+  --color-accent-border: rgba(16, 185, 129, 0.4);
+  --color-accent-ring: rgba(16, 185, 129, 0.3);
+
+  --status-idle-bg: #142820;
+  --status-idle-dot: #4B7A66;
+  --status-idle-text: #86BBA4;
+
+  --status-running-bg: rgba(16, 185, 129, 0.16);
+  --status-running-dot: #10B981;
+  --status-running-text: #6EE7B7;
+
+  --status-paused-bg: rgba(245, 158, 11, 0.14);
+  --status-paused-dot: #F59E0B;
+  --status-paused-text: #FCD34D;
+
+  --status-completed-bg: rgba(34, 197, 94, 0.15);
+  --status-completed-dot: #22C55E;
+  --status-completed-text: #86EFAC;
+
+  --color-danger: #EF4444;
+  --color-danger-subtle: rgba(239, 68, 68, 0.14);
+
+  --border-subtle: 1px solid #19382B;
+  --border-card: 1px solid #1E4434;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 8px 32px -6px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 20px 48px -10px rgba(0, 0, 0, 0.65);
+}
+
+/* Warm Terracotta Sunset Theme */
+[data-theme="sunset"] {
+  --color-bg: #150E0B;
+  --color-surface: #221612;
+  --color-surface-hover: #2F1E19;
+  --color-surface-subtle: #291A15;
+
+  --color-text-primary: #FFF7ED;
+  --color-text-secondary: #FED7AA;
+  --color-text-muted: #FB923C;
+  --color-text-inverted: #150E0B;
+
+  --color-accent: #EA580C;
+  --color-accent-hover: #C2410C;
+  --color-accent-subtle: rgba(234, 88, 12, 0.16);
+  --color-accent-border: rgba(234, 88, 12, 0.4);
+  --color-accent-ring: rgba(234, 88, 12, 0.3);
+
+  --status-idle-bg: #291A15;
+  --status-idle-dot: #7C4F3F;
+  --status-idle-text: #BFA094;
+
+  --status-running-bg: rgba(234, 88, 12, 0.18);
+  --status-running-dot: #EA580C;
+  --status-running-text: #FDBA74;
+
+  --status-paused-bg: rgba(217, 119, 6, 0.14);
+  --status-paused-dot: #D97706;
+  --status-paused-text: #FDE68A;
+
+  --status-completed-bg: rgba(16, 185, 129, 0.15);
+  --status-completed-dot: #10B981;
+  --status-completed-text: #A7F3D0;
+
+  --color-danger: #EF4444;
+  --color-danger-subtle: rgba(239, 68, 68, 0.14);
+
+  --border-subtle: 1px solid #38241D;
+  --border-card: 1px solid #442B23;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 8px 32px -6px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 20px 48px -10px rgba(0, 0, 0, 0.65);
+}
+
 /* Base Reset & Layout */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -7665,4 +7800,1029 @@ kbd {
     padding: 6px;
   }
 }
+
+/* ==============================================================================
+   Doflow Coins & Ledger Component Styles (Stage 2)
+   ============================================================================== */
+
+.coin-badge-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.coin-balance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #B45309;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+[data-theme="dark"] .coin-balance-badge {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #FBBF24;
+}
+
+.coin-balance-badge:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+}
+
+.coin-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.coin-amount {
+  letter-spacing: 0.02em;
+}
+
+/* Floating Reward Toast */
+.coin-reward-toast {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 15px rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  min-width: 260px;
+  animation: coinToastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes coinToastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.coin-reward-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coin-reward-icon {
+  font-size: 1.15rem;
+}
+
+.coin-reward-text {
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+
+.coin-reward-text strong {
+  color: #D97706;
+}
+
+[data-theme="dark"] .coin-reward-text strong {
+  color: #FBBF24;
+}
+
+.coin-reward-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.coin-reward-close-btn:hover {
+  color: var(--color-text-primary);
+}
+
+/* Coin History & Ledger Modal */
+.coin-history-modal-content {
+  max-width: 580px;
+  width: 92%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.coin-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coin-modal-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.coin-modal-subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 3px 0 0 0;
+}
+
+.coin-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.coin-stat-card {
+  background: var(--color-surface-subtle);
+  border: var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 14px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coin-stat-card.primary {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+[data-theme="dark"] .coin-stat-card.primary {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.coin-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.coin-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.coin-stat-card.primary .coin-stat-value {
+  color: #D97706;
+}
+
+[data-theme="dark"] .coin-stat-card.primary .coin-stat-value {
+  color: #FBBF24;
+}
+
+.coin-auth-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+}
+
+.coin-auth-login-btn {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.coin-auth-login-btn:hover {
+  background: #1D4ED8;
+}
+
+.coin-history-section {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 180px;
+  max-height: 320px;
+  padding-right: 4px;
+}
+
+.coin-history-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin: 0 0 10px 0;
+}
+
+.coin-history-empty {
+  text-align: center;
+  padding: 28px 16px;
+  background: var(--color-surface-subtle);
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+}
+
+.coin-empty-icon {
+  font-size: 1.6rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.coin-empty-text {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text-primary);
+  margin: 0 0 4px 0;
+}
+
+.coin-empty-subtext {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.coin-transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coin-transaction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: var(--border-card);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.coin-transaction-item:hover {
+  border-color: var(--color-border);
+}
+
+.coin-tx-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coin-tx-badge {
+  font-size: 0.9rem;
+}
+
+.coin-tx-desc {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.coin-tx-meta {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.coin-tx-amount {
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.coin-tx-amount.positive {
+  color: #16A34A;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+[data-theme="dark"] .coin-tx-amount.positive {
+  color: #4ADE80;
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.coin-tx-amount.negative {
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.12);
+}
+
+/* ==========================================================================
+   Student Perks Marketplace Styles
+   ========================================================================== */
+
+.perks-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.perks-hero-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.perks-hero-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perks-hero-tagline {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* Balance & 100-Coin Reward Progress Card */
+.perks-balance-card {
+  background: var(--color-surface);
+  border: var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.perks-balance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F59E0B, #EA580C, #8B5CF6);
+}
+
+.perks-balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.perks-balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.perks-balance-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.perks-balance-amount {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perks-balance-unit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #D97706;
+}
+
+.perks-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface-subtle);
+  border: var(--border-subtle);
+  color: var(--color-text-primary);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.perks-history-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+}
+
+/* Progress toward next 100-coin reward */
+.perks-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--color-surface-subtle);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+}
+
+.perks-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.perks-progress-subtitle {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.perks-progress-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme="dark"] .perks-progress-track,
+[data-theme="nordic"] .perks-progress-track,
+[data-theme="forest"] .perks-progress-track,
+[data-theme="sunset"] .perks-progress-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.perks-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F59E0B 0%, #EA580C 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Controls: Search & Category Filter Pills */
+.perks-controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (min-width: 680px) {
+  .perks-controls-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.perks-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+
+.perks-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.perks-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  background: var(--color-surface);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.perks-search-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-ring);
+}
+
+.perks-categories-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.perk-category-pill {
+  background: var(--color-surface);
+  border: var(--border-subtle);
+  color: var(--color-text-secondary);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.perk-category-pill:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.perk-category-pill.active {
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px var(--color-accent-ring);
+}
+
+/* Rewards Grid */
+.perks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.perks-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  background: var(--color-surface);
+  border: var(--border-card);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+}
+
+.perks-empty-icon {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+}
+
+/* Perk Card */
+.perk-card {
+  background: var(--color-surface);
+  border: var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+.perk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-accent-border);
+}
+
+.perk-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.perk-category-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
+.perk-category-badge.themes {
+  background: rgba(56, 189, 248, 0.14);
+  color: #0284C7;
+}
+
+[data-theme="dark"] .perk-category-badge.themes,
+[data-theme="nordic"] .perk-category-badge.themes,
+[data-theme="forest"] .perk-category-badge.themes,
+[data-theme="sunset"] .perk-category-badge.themes {
+  color: #38BDF8;
+}
+
+.perk-category-badge.sounds {
+  background: rgba(245, 158, 11, 0.14);
+  color: #D97706;
+}
+
+[data-theme="dark"] .perk-category-badge.sounds,
+[data-theme="nordic"] .perk-category-badge.sounds,
+[data-theme="forest"] .perk-category-badge.sounds,
+[data-theme="sunset"] .perk-category-badge.sounds {
+  color: #FBBF24;
+}
+
+.perk-category-badge.badges {
+  background: rgba(139, 92, 246, 0.14);
+  color: #7C3AED;
+}
+
+[data-theme="dark"] .perk-category-badge.badges,
+[data-theme="nordic"] .perk-category-badge.badges,
+[data-theme="forest"] .perk-category-badge.badges,
+[data-theme="sunset"] .perk-category-badge.badges {
+  color: #A78BFA;
+}
+
+.perk-category-badge.customization {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+}
+
+[data-theme="dark"] .perk-category-badge.customization,
+[data-theme="nordic"] .perk-category-badge.customization,
+[data-theme="forest"] .perk-category-badge.customization,
+[data-theme="sunset"] .perk-category-badge.customization {
+  color: #34D399;
+}
+
+.perk-price-pill {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #D97706;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.perk-visual-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.perk-icon-avatar {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-subtle);
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+}
+
+.perk-color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.perk-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.perk-description {
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin-bottom: 18px;
+  flex-grow: 1;
+}
+
+/* Perk Action Controls */
+.perk-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.btn-redeem-perk {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-redeem-perk:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-redeem-perk:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-insufficient-coins {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-owned-status {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #16A34A;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+[data-theme="dark"] .btn-owned-status,
+[data-theme="nordic"] .btn-owned-status,
+[data-theme="forest"] .btn-owned-status,
+[data-theme="sunset"] .btn-owned-status {
+  color: #4ADE80;
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.btn-activate-perk {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-activate-perk:hover {
+  background: var(--color-accent-subtle);
+}
+
+.btn-activate-perk.active {
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border-color: var(--color-accent);
+}
+
+/* Successful Redemption Modal */
+.perk-success-modal-card {
+  max-width: 440px;
+  text-align: center;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.perk-success-confetti-icon {
+  font-size: 3.5rem;
+  animation: bounce 0.6s ease-out;
+}
+
+.perk-success-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.perk-success-desc {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.perk-success-details {
+  background: var(--color-surface-subtle);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.perk-success-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Partner Offers & Voucher Styles
+   ========================================================================== */
+
+.partner-card {
+  border-left: 4px solid #F59E0B;
+}
+
+.partner-badge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.partner-org-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #D97706;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.partner-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.partner-status-pill.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+}
+
+[data-theme="dark"] .partner-status-pill.active,
+[data-theme="nordic"] .partner-status-pill.active,
+[data-theme="forest"] .partner-status-pill.active,
+[data-theme="sunset"] .partner-status-pill.active {
+  color: #4ADE80;
+}
+
+.partner-status-pill.out_of_stock {
+  background: rgba(239, 68, 68, 0.14);
+  color: #DC2626;
+}
+
+.partner-status-pill.paused {
+  background: rgba(245, 158, 11, 0.15);
+  color: #D97706;
+}
+
+.partner-status-pill.expired {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+}
+
+.partner-status-pill.pending_agreement {
+  background: rgba(139, 92, 246, 0.14);
+  color: #7C3AED;
+}
+
+.partner-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: 10px 0 14px;
+}
+
+.partner-code-card {
+  background: var(--color-surface-subtle);
+  border: 1px dashed var(--color-accent-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.partner-code-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.partner-code-display {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.partner-terms-collapse {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: var(--border-subtle);
+}
+
+.partner-admin-btn {
+  background: transparent;
+  border: var(--border-subtle);
+  color: var(--color-text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.partner-admin-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+}
+
+
 

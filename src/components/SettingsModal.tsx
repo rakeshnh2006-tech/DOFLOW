@@ -11,6 +11,7 @@ interface SettingsModalProps {
   soundscapeEnabled?: boolean;
   onToggleSoundscapeEnabled?: (enabled: boolean) => void;
   onNavigateLegal?: (view: 'privacy' | 'terms' | 'login') => void;
+  unlockedThemes?: string[];
 }
 
 interface SettingsDialogProps {
@@ -20,6 +21,7 @@ interface SettingsDialogProps {
   soundscapeEnabled?: boolean;
   onToggleSoundscapeEnabled?: (enabled: boolean) => void;
   onNavigateLegal?: (view: 'privacy' | 'terms' | 'login') => void;
+  unlockedThemes?: string[];
 }
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
@@ -29,6 +31,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   soundscapeEnabled = true,
   onToggleSoundscapeEnabled,
   onNavigateLegal,
+  unlockedThemes = [],
 }) => {
   const [focusInput, setFocusInput] = useState<string>(
     String(preferences.focusDurationMinutes)
@@ -228,6 +231,42 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               >
                 <span>Dark</span>
               </button>
+              {unlockedThemes.includes('nordic') && (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={themeInput === 'nordic'}
+                  className={`theme-btn ${themeInput === 'nordic' ? 'active' : ''}`}
+                  onClick={() => setThemeInput('nordic')}
+                  data-testid="theme-toggle-nordic"
+                >
+                  <span>Nordic 🌌</span>
+                </button>
+              )}
+              {unlockedThemes.includes('forest') && (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={themeInput === 'forest'}
+                  className={`theme-btn ${themeInput === 'forest' ? 'active' : ''}`}
+                  onClick={() => setThemeInput('forest')}
+                  data-testid="theme-toggle-forest"
+                >
+                  <span>Forest 🌲</span>
+                </button>
+              )}
+              {unlockedThemes.includes('sunset') && (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={themeInput === 'sunset'}
+                  className={`theme-btn ${themeInput === 'sunset' ? 'active' : ''}`}
+                  onClick={() => setThemeInput('sunset')}
+                  data-testid="theme-toggle-sunset"
+                >
+                  <span>Sunset 🌅</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -350,6 +389,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   soundscapeEnabled,
   onToggleSoundscapeEnabled,
   onNavigateLegal,
+  unlockedThemes,
 }) => {
   if (!isOpen) return null;
 
@@ -361,6 +401,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       soundscapeEnabled={soundscapeEnabled}
       onToggleSoundscapeEnabled={onToggleSoundscapeEnabled}
       onNavigateLegal={onNavigateLegal}
+      unlockedThemes={unlockedThemes}
     />
   );
 };

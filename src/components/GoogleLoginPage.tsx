@@ -85,9 +85,11 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
   const googleButtonContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Keep input synchronized when prop changes
-  useEffect(() => {
+  const [prevClientIdProp, setPrevClientIdProp] = useState(googleClientId);
+  if (googleClientId !== prevClientIdProp) {
+    setPrevClientIdProp(googleClientId);
     setClientIdInput(googleClientId);
-  }, [googleClientId]);
+  }
 
   // Synchronize Google Identity Services SDK button if available & client ID configured
   useEffect(() => {
