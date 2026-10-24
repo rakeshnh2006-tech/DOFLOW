@@ -11,9 +11,14 @@ export interface DistractingApp {
   category: AppCategory;
   packageNameAndroid?: string;
   bundleIdIos?: string;
-  webDomain?: string;
   iconName?: string;
   isCustom?: boolean;
+}
+
+export interface FamilyActivitySummary {
+  applicationCount: number;
+  categoryCount: number;
+  totalSelected: number;
 }
 
 export interface FocusLockSettings {
@@ -47,9 +52,9 @@ export interface FocusLockSettings {
    */
   customApps: DistractingApp[];
   /**
-   * Web focus protection behavior when running inside a browser sandbox.
+   * Optional web focus mode (kept for backward compatibility with previous cloud sync data).
    */
-  webFocusMode: 'shield' | 'gentle';
+  webFocusMode?: 'shield' | 'gentle';
   /**
    * Strict mode: requires confirmation modal when ending early to prevent reflexive quitting.
    */
@@ -167,7 +172,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.instagram.android',
     bundleIdIos: 'com.burbn.instagram',
-    webDomain: 'instagram.com',
   },
   {
     id: 'tiktok',
@@ -175,7 +179,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.zhiliaoapp.musically',
     bundleIdIos: 'com.zhiliaoapp.musically',
-    webDomain: 'tiktok.com',
   },
   {
     id: 'x_twitter',
@@ -183,7 +186,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.twitter.android',
     bundleIdIos: 'com.atebits.Tweetie2',
-    webDomain: 'twitter.com',
   },
   {
     id: 'facebook',
@@ -191,7 +193,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.facebook.katana',
     bundleIdIos: 'com.facebook.Facebook',
-    webDomain: 'facebook.com',
   },
   {
     id: 'reddit',
@@ -199,7 +200,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.reddit.frontpage',
     bundleIdIos: 'com.reddit.Reddit',
-    webDomain: 'reddit.com',
   },
   {
     id: 'snapchat',
@@ -207,7 +207,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'social',
     packageNameAndroid: 'com.snapchat.android',
     bundleIdIos: 'com.toyopagroup.picaboo',
-    webDomain: 'snapchat.com',
   },
 
   // Entertainment / Streaming
@@ -217,7 +216,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'entertainment',
     packageNameAndroid: 'com.google.android.youtube',
     bundleIdIos: 'com.google.ios.youtube',
-    webDomain: 'youtube.com',
   },
   {
     id: 'netflix',
@@ -225,7 +223,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'entertainment',
     packageNameAndroid: 'com.netflix.mediaclient',
     bundleIdIos: 'com.netflix.Netflix',
-    webDomain: 'netflix.com',
   },
   {
     id: 'twitch',
@@ -233,7 +230,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'entertainment',
     packageNameAndroid: 'tv.twitch.android.app',
     bundleIdIos: 'tv.twitch',
-    webDomain: 'twitch.tv',
   },
 
   // Messaging & Chat
@@ -243,7 +239,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'messaging',
     packageNameAndroid: 'com.discord',
     bundleIdIos: 'com.hammerandchisel.discord',
-    webDomain: 'discord.com',
   },
   {
     id: 'whatsapp',
@@ -251,7 +246,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'messaging',
     packageNameAndroid: 'com.whatsapp',
     bundleIdIos: 'net.whatsapp.WhatsApp',
-    webDomain: 'web.whatsapp.com',
   },
   {
     id: 'telegram',
@@ -259,7 +253,6 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     category: 'messaging',
     packageNameAndroid: 'org.telegram.messenger',
     bundleIdIos: 'ph.telegra.Telegraph',
-    webDomain: 'web.telegram.org',
   },
 
   // Mobile Games
@@ -271,6 +264,8 @@ export const PRESET_DISTRACTING_APPS: DistractingApp[] = [
     bundleIdIos: 'com.supercell.clashroyale',
   },
 ];
+
+export const DEFAULT_FOCUS_DURATION_MS = 25 * 60 * 1000; // 25 minutes default
 
 export const DEFAULT_FOCUS_LOCK_SETTINGS: FocusLockSettings = {
   enabled: true,

@@ -415,6 +415,8 @@ export const App: React.FC = () => {
         androidPermissions={focusLockState.androidPermissions}
         onRequestAccessibility={focusLockState.requestAccessibilityPermission}
         onRequestBatteryExemption={focusLockState.requestBatteryExemption}
+        onSelectWithIosPicker={focusLockState.selectIosAppsWithFamilyPicker}
+        iosActivitySummary={focusLockState.iosActivitySummary}
       />
 
       {/* Confirmation prompt when user chooses to end session early */}

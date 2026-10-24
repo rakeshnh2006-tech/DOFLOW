@@ -12,7 +12,7 @@ interface FocusLockModalProps {
   onSelectAll: (appIds?: string[]) => void;
   onDeselectAll: () => void;
   onSelectCategory: (category: AppCategory) => void;
-  onAddCustomApp: (name: string, category?: AppCategory, domainOrPackage?: string) => void;
+  onAddCustomApp: (name: string, category?: AppCategory, packageName?: string) => void;
   onRemoveCustomApp: (appId: string) => void;
   platform: 'web' | 'android' | 'ios';
   isLocked: boolean;
@@ -24,6 +24,8 @@ interface FocusLockModalProps {
   } | null;
   onRequestAccessibility?: () => void;
   onRequestBatteryExemption?: () => void;
+  onSelectWithIosPicker?: () => void;
+  iosActivitySummary?: { applicationCount: number; categoryCount: number; totalSelected: number } | null;
 }
 
 export const FocusLockModal: React.FC<FocusLockModalProps> = ({
@@ -44,11 +46,13 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
   androidPermissions,
   onRequestAccessibility,
   onRequestBatteryExemption,
+  onSelectWithIosPicker,
+  iosActivitySummary,
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | AppCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [customAppName, setCustomAppName] = useState('');
-  const [customAppDomain, setCustomAppDomain] = useState('');
+  const [customPackageName, setCustomPackageName] = useState('');
   const [customCategory, setCustomCategory] = useState<AppCategory>('custom');
   const [showAddCustom, setShowAddCustom] = useState(false);
 
@@ -60,7 +64,7 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
         !searchQuery.trim() ||
         app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (app.webDomain && app.webDomain.toLowerCase().includes(searchQuery.toLowerCase()));
+        (app.packageNameAndroid && app.packageNameAndroid.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
   }, [availableApps, activeTab, searchQuery]);
@@ -82,9 +86,9 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
   const handleAddCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customAppName.trim()) return;
-    onAddCustomApp(customAppName.trim(), customCategory, customAppDomain.trim() || undefined);
+    onAddCustomApp(customAppName.trim(), customCategory, customPackageName.trim() || undefined);
     setCustomAppName('');
-    setCustomAppDomain('');
+    setCustomPackageName('');
     setShowAddCustom(false);
   };
 
@@ -161,18 +165,70 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
             <div className="notice-content">
               <strong>
                 {platform === 'web'
-                  ? 'Web Focus Mode'
+                  ? 'Mobile-Only Focus Lock'
                   : platform === 'android'
-                  ? 'Android App Blocker'
+                  ? 'Android Native App Blocker'
                   : 'iOS Screen Time Restriction'}
               </strong>
               <p>
                 {platform === 'web'
-                  ? 'Running in web browser. Doflow provides tab focus shielding, session countdown badges, and anti-distraction alerts. OS-level native app blocking requires the Doflow Android/iOS native app.'
-                  : 'System-level distraction protection is active. Blocked applications will be restricted while your Pomodoro timer is running.'}
+                  ? 'Focus Lock is a native mobile feature that enforces OS-level app restrictions on physical Android and iOS devices. Website blocking, domain inputs, and URL lists are not supported.'
+                  : 'System-level distraction protection is active. Selected applications will be restricted while your Pomodoro focus timer is running.'}
               </p>
             </div>
           </div>
+
+          {/* iOS Family Controls Screen Time Panel */}
+          {platform === 'ios' && (
+            <div className="android-permissions-panel" data-testid="ios-family-controls-panel">
+              <div className="permissions-panel-header">
+                <span className="permissions-panel-title">Apple Screen Time Integration</span>
+                <span className="permissions-panel-desc">
+                  Uses Apple FamilyControls and ManagedSettings to shield selected apps without exposing private package lists.
+                </span>
+              </div>
+              <div className="permission-row">
+                <div className="permission-info">
+                  <div className="permission-title-group">
+                    <span className="permission-name">FamilyControls Authorization</span>
+                    <span className={`permission-badge ${androidPermissions?.allPermissionsGranted ? 'granted' : 'needed'}`}>
+                      {androidPermissions?.allPermissionsGranted ? '✓ Authorized' : '⚠ Authorization Needed'}
+                    </span>
+                  </div>
+                  <p className="permission-subtext">
+                    Requires Screen Time access approved via Face ID / Touch ID / Device Passcode.
+                  </p>
+                </div>
+                {!androidPermissions?.allPermissionsGranted && onRequestAccessibility && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={onRequestAccessibility}
+                    data-testid="grant-ios-family-controls"
+                  >
+                    Request Screen Time Access
+                  </button>
+                )}
+              </div>
+              {onSelectWithIosPicker && (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={onSelectWithIosPicker}
+                    data-testid="btn-ios-family-picker"
+                  >
+                    🛡️ Open Apple App Picker
+                  </button>
+                  {iosActivitySummary && iosActivitySummary.totalSelected > 0 && (
+                    <span style={{ marginLeft: '0.75rem', fontSize: '0.875rem', color: '#10b981' }}>
+                      ✓ {iosActivitySummary.applicationCount} apps, {iosActivitySummary.categoryCount} categories selected
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Android Permissions Onboarding Panel (Requirement 1, 8, 9) */}
           {platform === 'android' && (
@@ -420,16 +476,16 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
                 className="btn-add-custom-app-toggle"
                 onClick={() => setShowAddCustom(true)}
               >
-                + Add Custom App or Website Domain
+                + Add Custom App by Package Name
               </button>
             ) : (
               <form onSubmit={handleAddCustomSubmit} className="add-custom-form">
-                <h4 className="custom-form-title">Add Distracting App or Domain</h4>
+                <h4 className="custom-form-title">Add Custom Distracting App</h4>
                 <div className="custom-form-inputs">
                   <input
                     type="text"
                     className="custom-input"
-                    placeholder="App or Site Name (e.g. Threads)"
+                    placeholder="App Name (e.g. Threads)"
                     value={customAppName}
                     onChange={(e) => setCustomAppName(e.target.value)}
                     required
@@ -438,9 +494,9 @@ export const FocusLockModal: React.FC<FocusLockModalProps> = ({
                   <input
                     type="text"
                     className="custom-input"
-                    placeholder="Domain or Package (e.g. threads.net)"
-                    value={customAppDomain}
-                    onChange={(e) => setCustomAppDomain(e.target.value)}
+                    placeholder="Package Identifier (e.g. com.threads.app)"
+                    value={customPackageName}
+                    onChange={(e) => setCustomPackageName(e.target.value)}
                   />
                   <select
                     className="custom-select"

@@ -54,6 +54,13 @@ export interface NativeFocusLockPlugin {
     reason?: string;
   }): Promise<{ success: boolean; isLocked: boolean; error?: string }>;
   getLockStatus(): Promise<NativeLockStatus>;
+  selectAppsWithFamilyPicker?(): Promise<{
+    success: boolean;
+    applicationCount: number;
+    categoryCount: number;
+    totalSelected: number;
+    error?: string;
+  }>;
 }
 
 // Register native plugin proxy with Capacitor
@@ -134,6 +141,27 @@ export class FocusLockBridge {
   // Backward compatibility alias
   public static async fetchInstalledAndroidApps(): Promise<DistractingApp[]> {
     return this.fetchInstalledApps();
+  }
+
+  public static async presentIosAppPicker(): Promise<{
+    success: boolean;
+    applicationCount: number;
+    categoryCount: number;
+    totalSelected: number;
+    error?: string;
+  }> {
+    if (!this.isIosNative()) {
+      return { success: false, applicationCount: 0, categoryCount: 0, totalSelected: 0, error: 'Only supported on iOS native app.' };
+    }
+    try {
+      if (NativeDoflowFocusLock.selectAppsWithFamilyPicker) {
+        return await NativeDoflowFocusLock.selectAppsWithFamilyPicker();
+      }
+      return { success: false, applicationCount: 0, categoryCount: 0, totalSelected: 0, error: 'Family picker method not implemented.' };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return { success: false, applicationCount: 0, categoryCount: 0, totalSelected: 0, error: msg };
+    }
   }
 
   public static async startNativeLock(

@@ -6,6 +6,78 @@ import FamilyControls
 #if canImport(ManagedSettings)
 import ManagedSettings
 #endif
+#if canImport(SwiftUI) && canImport(FamilyControls)
+import SwiftUI
+#endif
+
+#if canImport(SwiftUI) && canImport(FamilyControls)
+@available(iOS 16.0, *)
+struct FamilyPickerSwiftUIView: View {
+    @State var selection: FamilyActivitySelection
+    var onDone: (FamilyActivitySelection) -> Void
+    var onCancel: () -> Void
+
+    var body: some View {
+        NavigationView {
+            FamilyActivityPicker(selection: $selection)
+                .navigationTitle("Select Distracting Apps")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            onCancel()
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            onDone(selection)
+                        }
+                    }
+                }
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+class FamilyPickerHostController: UIHostingController<FamilyPickerSwiftUIView> {
+    init(onDone: @escaping (FamilyActivitySelection) -> Void, onCancel: @escaping () -> Void) {
+        var initialSelection = FamilyActivitySelection()
+        if let data = FocusLockStorage.shared.loadFamilySelectionData(),
+           let decoded = try? PropertyListDecoder().decode(FamilyActivitySelection.self, from: data) {
+            initialSelection = decoded
+        }
+
+        var onDoneHolder: ((FamilyActivitySelection) -> Void)?
+        var onCancelHolder: (() -> Void)?
+
+        let rootView = FamilyPickerSwiftUIView(
+            selection: initialSelection,
+            onDone: { sel in
+                onDoneHolder?(sel)
+            },
+            onCancel: {
+                onCancelHolder?()
+            }
+        )
+        super.init(rootView: rootView)
+
+        onDoneHolder = { [weak self] sel in
+            self?.dismiss(animated: true) {
+                onDone(sel)
+            }
+        }
+        onCancelHolder = { [weak self] in
+            self?.dismiss(animated: true) {
+                onCancel()
+            }
+        }
+    }
+
+    @MainActor required dynamic init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+#endif
 
 @objc(DoflowFocusLockPlugin)
 public class DoflowFocusLockPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -17,6 +89,7 @@ public class DoflowFocusLockPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "requestAccessibilityPermission", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestBatteryExemption", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getInstalledApps", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "selectAppsWithFamilyPicker", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "startFocusLock", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stopFocusLock", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getLockStatus", returnType: CAPPluginReturnPromise)
@@ -65,29 +138,59 @@ public class DoflowFocusLockPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func requestBatteryExemption(_ call: CAPPluginCall) {
-        // Battery optimization exemption is not required/supported on iOS
         call.resolve(["opened": true])
     }
 
     @objc func getInstalledApps(_ call: CAPPluginCall) {
-        // iOS restricts querying installed third-party apps directly via bundle ID due to privacy sandboxing.
-        // Screen Time / FamilyActivityPicker uses tokens.
-        let defaultApps: [[String: Any]] = [
-            ["id": "com.burbn.instagram", "name": "Instagram", "packageName": "com.burbn.instagram", "category": "social"],
-            ["id": "com.zhiliaoapp.musically", "name": "TikTok", "packageName": "com.zhiliaoapp.musically", "category": "social"],
-            ["id": "com.atebits.Tweetie2", "name": "X (Twitter)", "packageName": "com.atebits.Tweetie2", "category": "social"],
-            ["id": "com.facebook.Facebook", "name": "Facebook", "packageName": "com.facebook.Facebook", "category": "social"],
-            ["id": "com.reddit.Reddit", "name": "Reddit", "packageName": "com.reddit.Reddit", "category": "social"],
-            ["id": "com.toyopagroup.picaboo", "name": "Snapchat", "packageName": "com.toyopagroup.picaboo", "category": "social"],
-            ["id": "com.google.ios.youtube", "name": "YouTube", "packageName": "com.google.ios.youtube", "category": "entertainment"],
-            ["id": "com.netflix.Netflix", "name": "Netflix", "packageName": "com.netflix.Netflix", "category": "entertainment"],
-            ["id": "tv.twitch", "name": "Twitch", "packageName": "tv.twitch", "category": "entertainment"],
-            ["id": "com.hammerandchisel.discord", "name": "Discord", "packageName": "com.hammerandchisel.discord", "category": "messaging"]
-        ]
+        // iOS restricts querying third-party installed apps via bundle ID for privacy.
+        // Screen Time requires the system FamilyActivityPicker sheet.
+        call.resolve([
+            "apps": [],
+            "totalCount": 0
+        ])
+    }
+
+    @objc func selectAppsWithFamilyPicker(_ call: CAPPluginCall) {
+        #if canImport(FamilyControls) && canImport(SwiftUI)
+        if #available(iOS 16.0, *) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let bridge = self.bridge, let viewController = bridge.viewController else {
+                    call.reject("Cannot access root view controller")
+                    return
+                }
+
+                let pickerVC = FamilyPickerHostController { (selection: FamilyActivitySelection) in
+                    if let data = try? PropertyListEncoder().encode(selection) {
+                        self.storage.saveFamilySelectionData(data)
+                    }
+                    call.resolve([
+                        "success": true,
+                        "applicationCount": selection.applicationTokens.count,
+                        "categoryCount": selection.categoryTokens.count,
+                        "totalSelected": selection.applicationTokens.count + selection.categoryTokens.count
+                    ])
+                } onCancel: {
+                    call.resolve([
+                        "success": false,
+                        "applicationCount": 0,
+                        "categoryCount": 0,
+                        "totalSelected": 0,
+                        "error": "User cancelled app picker"
+                    ])
+                }
+
+                viewController.present(pickerVC, animated: true)
+            }
+            return
+        }
+        #endif
 
         call.resolve([
-            "apps": defaultApps,
-            "totalCount": defaultApps.count
+            "success": false,
+            "applicationCount": 0,
+            "categoryCount": 0,
+            "totalSelected": 0,
+            "error": "FamilyControls not supported on this iOS version."
         ])
     }
 
@@ -105,26 +208,32 @@ public class DoflowFocusLockPlugin: CAPPlugin, CAPBridgedPlugin {
             blockedApps: blockedPackages
         )
 
-        #if canImport(ManagedSettings)
+        var blockedCount = blockedPackages.count
+
+        #if canImport(ManagedSettings) && canImport(FamilyControls)
         if #available(iOS 16.0, *) {
             let store = ManagedSettingsStore()
-            // When tokens are available via FamilyActivitySelection, store.shield.applications is set.
-            // Clear any previous shields first to ensure clean state
-            store.shield.applications = nil
-            store.shield.applicationCategories = nil
+            if let data = storage.loadFamilySelectionData(),
+               let selection = try? PropertyListDecoder().decode(FamilyActivitySelection.self, from: data) {
+                store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
+                store.shield.applicationCategories = selection.categoryTokens.isEmpty ? nil : .specific(selection.categoryTokens)
+                blockedCount = selection.applicationTokens.count
+            } else {
+                store.shield.applications = nil
+                store.shield.applicationCategories = nil
+            }
         }
         #endif
 
         call.resolve([
             "success": true,
             "isLocked": true,
-            "blockedCount": blockedPackages.count,
+            "blockedCount": blockedCount,
             "sessionId": sessionId
         ])
     }
 
     @objc func stopFocusLock(_ call: CAPPluginCall) {
-        // Immediately de-escalate and lift restrictions
         #if canImport(ManagedSettings)
         if #available(iOS 16.0, *) {
             let store = ManagedSettingsStore()

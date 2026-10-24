@@ -78,7 +78,7 @@ export const FocusLockBanner: React.FC<FocusLockBannerProps> = ({
               {hasFailedUnlock ? (
                 unlockError || 'Unable to confirm restriction removal. Tap Retry to unlock apps.'
               ) : platform === 'web' ? (
-                'Tab shield & distraction protection active'
+                'Focus session active — open mobile app for OS app restrictions'
               ) : (
                 'Native app restrictions active — tap End Session to unlock anytime'
               )}

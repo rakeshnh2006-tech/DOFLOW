@@ -174,6 +174,16 @@ public class DoflowFocusLockPlugin extends Plugin {
 
     @PluginMethod
     public void startFocusLock(PluginCall call) {
+        Context context = getContext();
+        if (!isAccessibilityEnabled(context)) {
+            JSObject ret = new JSObject();
+            ret.put("success", false);
+            ret.put("isLocked", false);
+            ret.put("error", "Accessibility Service must be enabled in device settings before starting Focus Lock.");
+            call.resolve(ret);
+            return;
+        }
+
         Long durationMs = call.getLong("durationMs", 25L * 60 * 1000);
         String sessionTitle = call.getString("sessionTitle", "Focus Session");
         String sessionId = call.getString("sessionId", "android_" + System.currentTimeMillis());

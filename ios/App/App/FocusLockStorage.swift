@@ -83,4 +83,15 @@ public class FocusLockStorage {
     public func getBlockedApps() -> [String] {
         return userDefaults.stringArray(forKey: keyBlockedApps) ?? []
     }
+
+    private var keyFamilySelection: String { "doflow_family_activity_selection" }
+
+    public func saveFamilySelectionData(_ data: Data) {
+        userDefaults.set(data, forKey: keyFamilySelection)
+        userDefaults.synchronize()
+    }
+
+    public func loadFamilySelectionData() -> Data? {
+        return userDefaults.data(forKey: keyFamilySelection)
+    }
 }

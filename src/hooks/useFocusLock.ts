@@ -10,6 +10,7 @@ import type {
   FocusLockSyncResult,
   FocusLockSyncStatus,
 } from '../types/focusLock';
+import { DEFAULT_FOCUS_DURATION_MS } from '../types/focusLock';
 import {
   loadFocusLockSettings,
   saveFocusLockSettings,
@@ -49,7 +50,7 @@ export interface UseFocusLockReturn {
   selectAllApps: (appIds?: string[]) => void;
   deselectAllApps: () => void;
   selectCategory: (category: AppCategory) => void;
-  addCustomApp: (name: string, category?: AppCategory, domainOrPackage?: string) => void;
+  addCustomApp: (name: string, category?: AppCategory, packageName?: string) => void;
   removeCustomApp: (appId: string) => void;
 
   // Session State
@@ -67,7 +68,7 @@ export interface UseFocusLockReturn {
   isUnlocking: boolean;
 
   // Lifecycle Methods
-  startSessionLock: (durationMs: number, sessionTitle?: string, customSessionId?: string) => Promise<boolean>;
+  startSessionLock: (durationMs?: number, sessionTitle?: string, customSessionId?: string) => Promise<boolean>;
   pauseSessionLock: () => void;
   resumeSessionLock: () => void;
   endSessionLock: (reason?: string | unknown) => Promise<boolean>;
@@ -94,6 +95,8 @@ export interface UseFocusLockReturn {
   requestAccessibilityPermission: () => Promise<boolean>;
   requestBatteryExemption: () => Promise<boolean>;
   refreshPermissions: () => Promise<void>;
+  selectIosAppsWithFamilyPicker: () => Promise<void>;
+  iosActivitySummary: { applicationCount: number; categoryCount: number; totalSelected: number } | null;
 
   // Authentication & Cloud Sync
   effectiveUserId: string;
@@ -203,6 +206,11 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
   const [isEndEarlyModalOpen, setIsEndEarlyModalOpen] = useState(false);
   const [androidInstalledApps, setAndroidInstalledApps] = useState<DistractingApp[]>([]);
   const [androidPermissions, setAndroidPermissions] = useState<AndroidPermissionStatus | null>(null);
+  const [iosActivitySummary, setIosActivitySummary] = useState<{
+    applicationCount: number;
+    categoryCount: number;
+    totalSelected: number;
+  } | null>(null);
 
   // Synchronization observables
   const [syncStatus, setSyncStatus] = useState<FocusLockSyncStatus>(() =>
@@ -382,7 +390,7 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
   );
 
   const addCustomApp = useCallback(
-    (name: string, category: AppCategory = 'custom', domainOrPackage?: string) => {
+    (name: string, category: AppCategory = 'custom', packageName?: string) => {
       const trimmedName = name.trim();
       if (!trimmedName) return;
 
@@ -391,9 +399,8 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
         id,
         name: trimmedName,
         category,
-        webDomain: domainOrPackage?.includes('.') ? domainOrPackage.trim() : undefined,
-        packageNameAndroid: domainOrPackage?.includes('.') ? domainOrPackage.trim() : undefined,
-        bundleIdIos: domainOrPackage?.includes('.') ? domainOrPackage.trim() : undefined,
+        packageNameAndroid: packageName?.trim() || undefined,
+        bundleIdIos: packageName?.trim() || undefined,
         isCustom: true,
       };
 
@@ -405,6 +412,24 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
     },
     [settings, updateSettings]
   );
+
+  const selectIosAppsWithFamilyPicker = useCallback(async () => {
+    if (platform !== 'ios') return;
+    try {
+      const res = await FocusLockBridge.presentIosAppPicker();
+      if (res.success) {
+        setIosActivitySummary({
+          applicationCount: res.applicationCount,
+          categoryCount: res.categoryCount,
+          totalSelected: res.totalSelected,
+        });
+      } else if (res.error) {
+        setUnlockError(res.error);
+      }
+    } catch (e) {
+      console.warn('iOS FamilyPicker error:', e);
+    }
+  }, [platform]);
 
   const removeCustomApp = useCallback(
     (appId: string) => {
@@ -427,7 +452,7 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
    */
   const startSessionLock = useCallback(
     async (
-      durationMs: number,
+      durationMs: number = DEFAULT_FOCUS_DURATION_MS,
       title: string = 'Deep Work Session',
       customSessionId?: string
     ): Promise<boolean> => {
@@ -437,6 +462,16 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
         return false;
       }
       if (isTransitioningRef.current) {
+        return false;
+      }
+
+      // Check required platform authorization before starting
+      if (platform === 'android' && androidPermissions && !androidPermissions.hasAccessibility) {
+        setUnlockError('Accessibility Service must be enabled in Android settings to restrict apps.');
+        return false;
+      }
+      if (platform === 'ios' && androidPermissions && !androidPermissions.allPermissionsGranted) {
+        setUnlockError('Apple Screen Time (FamilyControls) authorization is required to restrict apps.');
         return false;
       }
 
@@ -508,7 +543,7 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
       isTransitioningRef.current = false;
       return activationSuccess;
     },
-    [platform, settings.enabled, settings.selectedAppIds]
+    [platform, settings.enabled, settings.selectedAppIds, androidPermissions]
   );
 
   /**
@@ -939,6 +974,8 @@ export function useFocusLock(options: UseFocusLockOptions = {}): UseFocusLockRet
     requestAccessibilityPermission,
     requestBatteryExemption,
     refreshPermissions,
+    selectIosAppsWithFamilyPicker,
+    iosActivitySummary,
 
     effectiveUserId,
     syncStatus,
