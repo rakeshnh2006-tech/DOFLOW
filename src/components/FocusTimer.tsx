@@ -10,6 +10,20 @@ import { TimerStatusBadge } from './TimerStatusBadge';
 import { SwitchModeModal } from './SwitchModeModal';
 import { SessionSuggestion } from './SessionSuggestion';
 import { CycleIndicator } from './CycleIndicator';
+import { FocusLockBanner } from './FocusLockBanner';
+
+export interface FocusLockStateProp {
+  isLocked: boolean;
+  enabled: boolean;
+  blockedAppCount: number;
+  status?: import('../types/focusLock').FocusLockStatus;
+  remainingDisplay?: string;
+  unlockError?: string | null;
+  onOpenConfig: () => void;
+  onEndSessionEarly: () => void;
+  onRetryUnlock?: () => void;
+  platform: 'web' | 'android' | 'ios';
+}
 
 export interface ModeDurations {
   focus?: number;
@@ -40,6 +54,10 @@ export interface FocusTimerProps {
    */
   soundEnabled?: boolean;
   /**
+   * Optional Focus Lock controls and state.
+   */
+  focusLockState?: FocusLockStateProp;
+  /**
    * Optional callback triggered once when countdown completes.
    */
   onComplete?: (mode: TimerMode, durationMs?: number) => void;
@@ -63,6 +81,7 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
   initialMode = 'focus',
   activeTask,
   soundEnabled = false,
+  focusLockState,
   onComplete,
   onModeChange,
   onStatusChange,
@@ -178,9 +197,13 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
 
   // Reset current mode's duration
   const handleReset = useCallback(() => {
-    reset(currentDuration);
-    setLastCompletedSession(null);
-  }, [currentDuration, reset]);
+    if (currentMode === 'focus' && focusLockState?.isLocked) {
+      focusLockState.onEndSessionEarly();
+    } else {
+      reset(currentDuration);
+      setLastCompletedSession(null);
+    }
+  }, [currentDuration, currentMode, focusLockState, reset]);
 
   // Keep document title synchronized with mode & time
   useEffect(() => {
@@ -248,6 +271,26 @@ export const FocusTimer: React.FC<FocusTimerProps> = ({
             onSelectMode={handleSelectMode}
           />
         </div>
+
+        {/* Focus Lock Pill / Active Session Banner */}
+        {focusLockState && (
+          <div className="card-focus-lock-container">
+            <FocusLockBanner
+              isLocked={focusLockState.isLocked}
+              enabled={focusLockState.enabled}
+              blockedAppCount={focusLockState.blockedAppCount}
+              timerStatus={status}
+              timerMode={currentMode}
+              status={focusLockState.status}
+              remainingDisplay={focusLockState.remainingDisplay}
+              unlockError={focusLockState.unlockError}
+              onOpenConfig={focusLockState.onOpenConfig}
+              onEndSessionEarly={focusLockState.onEndSessionEarly}
+              onRetryUnlock={focusLockState.onRetryUnlock}
+              platform={focusLockState.platform}
+            />
+          </div>
+        )}
 
         {/* Status Indicator & Cycle Dots */}
         <div className="card-header">

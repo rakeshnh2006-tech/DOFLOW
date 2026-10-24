@@ -53,6 +53,7 @@ export interface GoogleLoginPageProps {
     sessionCount?: number;
     habitsCount?: number;
     tasksCount?: number;
+    focusLockSessionsCount?: number;
   };
 }
 
@@ -85,9 +86,11 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
   const googleButtonContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Keep input synchronized when prop changes
-  useEffect(() => {
+  const [prevClientId, setPrevClientId] = useState(googleClientId);
+  if (googleClientId !== prevClientId) {
+    setPrevClientId(googleClientId);
     setClientIdInput(googleClientId);
-  }, [googleClientId]);
+  }
 
   // Synchronize Google Identity Services SDK button if available & client ID configured
   useEffect(() => {
@@ -417,6 +420,10 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
               <div className="user-stat-card">
                 <span className="user-stat-num">{statsSummary?.sessionCount ?? 0}</span>
                 <span className="user-stat-label">Focus Sessions</span>
+              </div>
+              <div className="user-stat-card">
+                <span className="user-stat-num">{statsSummary?.focusLockSessionsCount ?? 0}</span>
+                <span className="user-stat-label">Focus Lock Locked</span>
               </div>
               <div className="user-stat-card">
                 <span className="user-stat-num">{statsSummary?.habitsCount ?? 0}</span>

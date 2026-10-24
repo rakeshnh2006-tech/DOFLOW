@@ -15,6 +15,8 @@ import { TermsConditionsPage } from './components/TermsConditionsPage';
 import { GoogleLoginPage } from './components/GoogleLoginPage';
 import { SettingsModal } from './components/SettingsModal';
 import { RunningTimerSettingModal } from './components/RunningTimerSettingModal';
+import { FocusLockModal } from './components/FocusLockModal';
+import { FocusLockEndEarlyModal } from './components/FocusLockEndEarlyModal';
 import { useTasks } from './hooks/useTasks';
 import { useProductivityStats } from './hooks/useProductivityStats';
 import { usePreferences } from './hooks/usePreferences';
@@ -24,6 +26,7 @@ import { useHabits } from './hooks/useHabits';
 import { useGoals } from './hooks/useGoals';
 import { useFlowIntelligence } from './hooks/useFlowIntelligence';
 import { useAuth } from './hooks/useAuth';
+import { useFocusLock } from './hooks/useFocusLock';
 import { clearAllDoflowData } from './utils/dataManagement';
 import { DEFAULT_PREFERENCES } from './types/settings';
 import { DEFAULT_DAILY_GOALS } from './utils/goalsStorage';
@@ -63,6 +66,51 @@ export const App: React.FC = () => {
 
   const pendingPreferencesRef = useRef<UserPreferences | null>(null);
   const resetTimerRef = useRef<((newDuration?: number) => void) | null>(null);
+
+  const handleManualEndSession = useCallback(() => {
+    resetTimerRef.current?.();
+  }, []);
+
+  const focusLockState = useFocusLock({
+    user: authState.user,
+    onManualEndSession: handleManualEndSession,
+  });
+
+  const handleTimerStatusChange = useCallback(
+    (newStatus: TimerStatus) => {
+      setTimerStatus(newStatus);
+      if (newStatus === 'running' && timerMode === 'focus') {
+        if (focusLockState.status === 'paused') {
+          focusLockState.resumeSessionLock();
+        } else if (!focusLockState.isActive) {
+          focusLockState.startSessionLock(preferencesState.durationsMs.focus);
+        }
+      } else if (newStatus === 'paused' && timerMode === 'focus') {
+        if (focusLockState.isActive) {
+          focusLockState.pauseSessionLock();
+        }
+      } else if (newStatus === 'idle') {
+        if (focusLockState.isActive) {
+          focusLockState.endSessionLock('timer_reset');
+        }
+      } else if (newStatus === 'completed') {
+        if (focusLockState.isActive) {
+          focusLockState.completeSessionLock();
+        }
+      }
+    },
+    [focusLockState, preferencesState.durationsMs.focus, timerMode]
+  );
+
+  const handleTimerModeChange = useCallback(
+    (newMode: TimerMode) => {
+      setTimerMode(newMode);
+      if (newMode !== 'focus' && focusLockState.isActive) {
+        focusLockState.endSessionLock('mode_switched');
+      }
+    },
+    [focusLockState]
+  );
 
   const handleSaveSettings = useCallback(
     (newPrefs: UserPreferences) => {
@@ -134,13 +182,14 @@ export const App: React.FC = () => {
 
   const handleTimerComplete = useCallback(
     (mode: TimerMode, durationMs?: number) => {
+      focusLockState.completeSessionLock();
       // Default to 25 min if durationMs not provided
       const record = statsState.recordCompletedSession(mode, durationMs ?? 25 * 60 * 1000);
       if (record && record.mode === 'focus') {
         intelligenceState.promptSessionReflection(record.id);
       }
     },
-    [statsState, intelligenceState]
+    [statsState, intelligenceState, focusLockState]
   );
 
   const handleClearAllData = useCallback(() => {
@@ -199,9 +248,21 @@ export const App: React.FC = () => {
           activeTask={taskState.activeTask}
           durations={preferencesState.durationsMs}
           soundEnabled={preferencesState.preferences.soundEnabled}
+          focusLockState={{
+            isLocked: focusLockState.isLocked,
+            enabled: focusLockState.settings.enabled,
+            blockedAppCount: focusLockState.selectedAppsCount,
+            status: focusLockState.status,
+            remainingDisplay: focusLockState.formattedRemaining.display,
+            unlockError: focusLockState.unlockError,
+            onOpenConfig: focusLockState.openConfigModal,
+            onEndSessionEarly: focusLockState.openEndEarlyModal,
+            onRetryUnlock: focusLockState.retryDeactivation,
+            platform: focusLockState.platform,
+          }}
           onComplete={handleTimerComplete}
-          onStatusChange={setTimerStatus}
-          onModeChange={setTimerMode}
+          onStatusChange={handleTimerStatusChange}
+          onModeChange={handleTimerModeChange}
           resetTimerRef={resetTimerRef}
         />
 
@@ -274,7 +335,10 @@ export const App: React.FC = () => {
           onCredentialResponse={authState.handleCredentialResponse}
           onLoginWithGoogle={authState.loginWithGoogle}
           onLogout={authState.logout}
-          onSyncData={authState.syncData}
+          onSyncData={async () => {
+            await authState.syncData();
+            await focusLockState.syncFocusLock();
+          }}
           onClearError={authState.clearError}
           onBack={() => setCurrentView('timer')}
           onNavigateToPrivacy={() => setCurrentView('privacy')}
@@ -283,6 +347,7 @@ export const App: React.FC = () => {
             sessionCount: statsState.sessionHistory.length,
             habitsCount: habitsState.habits.length,
             tasksCount: plannerState.plannedTasks.length + taskState.tasks.length,
+            focusLockSessionsCount: focusLockState.sessionHistory.length,
           }}
         />
       )}
@@ -328,6 +393,41 @@ export const App: React.FC = () => {
         soundscapeEnabled={soundscapeState.enabled}
         onToggleSoundscapeEnabled={soundscapeState.setEnabled}
         onNavigateLegal={setCurrentView}
+        onOpenFocusLock={focusLockState.openConfigModal}
+      />
+
+      {/* Focus Lock App Selection & Settings Modal */}
+      <FocusLockModal
+        isOpen={focusLockState.isConfigModalOpen}
+        onClose={focusLockState.closeConfigModal}
+        settings={focusLockState.settings}
+        onSaveSettings={focusLockState.updateSettings}
+        availableApps={focusLockState.availableApps}
+        selectedAppIds={focusLockState.selectedAppIds}
+        onToggleApp={focusLockState.toggleApp}
+        onSelectAll={focusLockState.selectAllApps}
+        onDeselectAll={focusLockState.deselectAllApps}
+        onSelectCategory={focusLockState.selectCategory}
+        onAddCustomApp={focusLockState.addCustomApp}
+        onRemoveCustomApp={focusLockState.removeCustomApp}
+        platform={focusLockState.platform}
+        isLocked={focusLockState.isLocked}
+        androidPermissions={focusLockState.androidPermissions}
+        onRequestAccessibility={focusLockState.requestAccessibilityPermission}
+        onRequestBatteryExemption={focusLockState.requestBatteryExemption}
+      />
+
+      {/* Confirmation prompt when user chooses to end session early */}
+      <FocusLockEndEarlyModal
+        isOpen={focusLockState.isEndEarlyModalOpen}
+        onCancel={focusLockState.closeEndEarlyModal}
+        onConfirm={focusLockState.confirmEndEarly}
+        remainingMinutes={Math.ceil(focusLockState.remainingMs / 60000)}
+        remainingDisplay={focusLockState.formattedRemaining.display}
+        isUnlocking={focusLockState.isUnlocking}
+        unlockError={focusLockState.unlockError}
+        onRetryUnlock={focusLockState.retryDeactivation}
+        blockedAppCount={focusLockState.selectedAppsCount}
       />
 
       {/* Confirmation prompt when updating durations during an active timer session */}

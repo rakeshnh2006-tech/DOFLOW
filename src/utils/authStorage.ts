@@ -13,9 +13,13 @@ export function getGoogleClientId(): string {
     return stored.trim();
   }
 
-  // Fallback to environment variable if configured
+  // Fallback to environment variable if configured (ignore unconfigured template placeholder)
   try {
-    return (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || '';
+    const envVal = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || '';
+    if (envVal.includes('your-google-client-id') || (import.meta.env.MODE === 'test' && !window.localStorage.getItem(GOOGLE_CLIENT_ID_STORAGE_KEY))) {
+      return '';
+    }
+    return envVal;
   } catch {
     return '';
   }

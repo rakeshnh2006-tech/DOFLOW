@@ -6,6 +6,12 @@ import { SOUNDSCAPE_STORAGE_KEY } from './soundscapeStorage';
 import { HABITS_STORAGE_KEY, HABIT_COMPLETIONS_STORAGE_KEY } from './habitStorage';
 import { DAILY_GOALS_STORAGE_KEY, ACHIEVEMENTS_STORAGE_KEY } from './goalsStorage';
 import { SESSION_REFLECTIONS_STORAGE_KEY } from './reflectionStorage';
+import {
+  FOCUS_LOCK_STORAGE_KEY,
+  FOCUS_LOCK_ACTIVE_SESSION_KEY,
+  FOCUS_LOCK_HISTORY_KEY,
+  FOCUS_LOCK_TERMINATED_SESSIONS_KEY,
+} from './focusLockStorage';
 
 /**
  * All known storage keys used by the Doflow application in localStorage.
@@ -119,6 +125,26 @@ export function clearAllDoflowData(): boolean {
 
     for (const key of DOFLOW_STORAGE_KEYS) {
       window.localStorage.removeItem(key);
+    }
+    window.localStorage.removeItem(FOCUS_LOCK_STORAGE_KEY);
+    window.localStorage.removeItem(FOCUS_LOCK_ACTIVE_SESSION_KEY);
+    window.localStorage.removeItem(FOCUS_LOCK_HISTORY_KEY);
+    window.localStorage.removeItem(FOCUS_LOCK_TERMINATED_SESSIONS_KEY);
+
+    // Also remove any partitioned user keys (e.g. doflow_focus_lock_* and doflow_sync_queue_*)
+    const allKeys: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (k) allKeys.push(k);
+    }
+    for (const k of allKeys) {
+      if (
+        k.startsWith('doflow_focus_lock_') ||
+        k.startsWith('doflow_sync_queue_') ||
+        k === 'doflow_device_id'
+      ) {
+        window.localStorage.removeItem(k);
+      }
     }
     return true;
   } catch {
