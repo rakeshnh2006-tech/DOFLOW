@@ -11,7 +11,6 @@ interface SettingsModalProps {
   soundscapeEnabled?: boolean;
   onToggleSoundscapeEnabled?: (enabled: boolean) => void;
   onNavigateLegal?: (view: 'privacy' | 'terms' | 'login') => void;
-  onOpenFocusLock?: () => void;
 }
 
 interface SettingsDialogProps {
@@ -21,7 +20,6 @@ interface SettingsDialogProps {
   soundscapeEnabled?: boolean;
   onToggleSoundscapeEnabled?: (enabled: boolean) => void;
   onNavigateLegal?: (view: 'privacy' | 'terms' | 'login') => void;
-  onOpenFocusLock?: () => void;
 }
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
@@ -31,7 +29,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   soundscapeEnabled = true,
   onToggleSoundscapeEnabled,
   onNavigateLegal,
-  onOpenFocusLock,
 }) => {
   const [focusInput, setFocusInput] = useState<string>(
     String(preferences.focusDurationMinutes)
@@ -279,28 +276,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             </div>
           )}
 
-          {/* Section 5: Focus Lock */}
-          {onOpenFocusLock && (
-            <div className="settings-section">
-              <h4 className="settings-section-heading">Doflow Focus Lock</h4>
-              <p className="settings-section-desc">
-                Select distracting apps to restrict during active countdowns to maintain deep flow state.
-              </p>
-              <button
-                type="button"
-                className="btn btn-secondary btn-settings-focus-lock"
-                onClick={() => {
-                  onClose();
-                  onOpenFocusLock();
-                }}
-                data-testid="settings-focus-lock-btn"
-              >
-                🔒 Configure Focus Lock &amp; Blocked Apps →
-              </button>
-            </div>
-          )}
-
-          {/* Section 6: Legal & Privacy */}
+          {/* Section 5: Legal & Privacy */}
           <div className="settings-section">
             <h4 className="settings-section-heading">Legal &amp; Privacy</h4>
             <p className="settings-section-desc">
@@ -374,7 +350,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   soundscapeEnabled,
   onToggleSoundscapeEnabled,
   onNavigateLegal,
-  onOpenFocusLock,
 }) => {
   if (!isOpen) return null;
 
@@ -386,7 +361,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       soundscapeEnabled={soundscapeEnabled}
       onToggleSoundscapeEnabled={onToggleSoundscapeEnabled}
       onNavigateLegal={onNavigateLegal}
-      onOpenFocusLock={onOpenFocusLock}
     />
   );
 };
