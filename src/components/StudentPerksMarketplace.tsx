@@ -64,10 +64,14 @@ export const StudentPerksMarketplace: React.FC<StudentPerksMarketplaceProps> = (
   const [expandedTermsId, setExpandedTermsId] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // Calculate progress toward next 100-coin reward
-  const cycleProgress = coinBalance % 100;
-  const coinsNeeded = 100 - cycleProgress;
-  const progressPercent = coinBalance >= 100 && cycleProgress === 0 ? 100 : cycleProgress;
+  // Calculate progress toward next 60-coin reward
+  const MILESTONE_DC = 60;
+  const cycleProgress = coinBalance % MILESTONE_DC;
+  const coinsNeeded = MILESTONE_DC - cycleProgress;
+  const progressPercent =
+    coinBalance >= MILESTONE_DC && cycleProgress === 0
+      ? 100
+      : Math.round((cycleProgress / MILESTONE_DC) * 100);
 
   const handleTabChange = (tab: MarketplaceTab) => {
     setActiveTab(tab);
@@ -119,8 +123,9 @@ export const StudentPerksMarketplace: React.FC<StudentPerksMarketplaceProps> = (
           )}
         </div>
         <p className="perks-hero-tagline">
-          Earn 1 Doflow Coin for every verified 25-minute focus session. Redeem coins for exclusive
-          themes, soundscapes, and verified third-party student partner offers.
+          Earn 10 Doflow Coins for 25-minute focus sessions, 1 coin for short breaks, and 2 coins for
+          long breaks. Redeem coins for exclusive themes, soundscapes, and verified third-party
+          student partner offers.
         </p>
       </div>
 
@@ -148,14 +153,14 @@ export const StudentPerksMarketplace: React.FC<StudentPerksMarketplaceProps> = (
           </button>
         </div>
 
-        {/* Progress indicator toward next 100-coin reward */}
+        {/* Progress indicator toward next 60-coin reward */}
         <div className="perks-progress-box" data-testid="perks-progress-indicator">
           <div className="perks-progress-header">
-            <span>Next Reward Milestone (100 DC)</span>
+            <span>Next Reward Milestone (60 DC)</span>
             <span>
-              {coinBalance >= 100 && cycleProgress === 0
-                ? '100 / 100 DC (Reward Available!)'
-                : `${cycleProgress} / 100 DC`}
+              {coinBalance >= 60 && cycleProgress === 0
+                ? '60 / 60 DC (Reward Available!)'
+                : `${cycleProgress} / 60 DC`}
             </span>
           </div>
           <div
@@ -164,14 +169,14 @@ export const StudentPerksMarketplace: React.FC<StudentPerksMarketplaceProps> = (
             aria-valuenow={progressPercent}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Progress toward next 100 coin reward"
+            aria-label="Progress toward next 60 coin reward"
           >
             <div className="perks-progress-fill" style={{ width: `${progressPercent}%` }} />
           </div>
           <div className="perks-progress-subtitle">
-            {coinBalance >= 100 && cycleProgress === 0
-              ? 'You have enough coins to redeem a 100 DC reward now!'
-              : `${coinsNeeded} DC needed for your next 100-coin unlock`}
+            {coinBalance >= 60 && cycleProgress === 0
+              ? 'You have enough coins to redeem a 60 DC reward now!'
+              : `${coinsNeeded} DC needed for your next 60-coin unlock`}
           </div>
         </div>
       </div>

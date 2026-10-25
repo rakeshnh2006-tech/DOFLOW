@@ -55,12 +55,32 @@ describe('Coin UI Components', () => {
       {
         id: 'tx-1',
         userId: 'u1',
-        amount: 1,
+        amount: 10,
         type: 'earned_focus',
         sessionId: 'sess-1',
-        description: 'Completed 25-minute focus session',
-        balanceAfter: 1,
+        description: 'Completed 25-minute focus session (+10 DC)',
+        balanceAfter: 10,
         timestamp: 1729000000000,
+      },
+      {
+        id: 'tx-2',
+        userId: 'u1',
+        amount: 1,
+        type: 'earned_break',
+        sessionId: 'sess-2',
+        description: 'Completed short break (+1 DC)',
+        balanceAfter: 11,
+        timestamp: 1729000100000,
+      },
+      {
+        id: 'tx-3',
+        userId: 'u1',
+        amount: 2,
+        type: 'earned_break',
+        sessionId: 'sess-3',
+        description: 'Completed long break (+2 DC)',
+        balanceAfter: 13,
+        timestamp: 1729000200000,
       },
     ];
 
@@ -68,8 +88,8 @@ describe('Coin UI Components', () => {
       <CoinHistoryModal
         isOpen={true}
         onClose={handleClose}
-        balance={1}
-        lifetimeEarned={1}
+        balance={13}
+        lifetimeEarned={13}
         lifetimeSpent={0}
         transactions={mockTransactions}
         isAuthenticated={true}
@@ -77,10 +97,12 @@ describe('Coin UI Components', () => {
     );
 
     expect(screen.getByTestId('coin-history-modal')).toBeInTheDocument();
-    expect(screen.getByTestId('coin-history-current-balance')).toHaveTextContent('1 DC');
-    expect(screen.getByTestId('coin-history-total-earned')).toHaveTextContent('1 DC');
+    expect(screen.getByTestId('coin-history-current-balance')).toHaveTextContent('13 DC');
+    expect(screen.getByTestId('coin-history-total-earned')).toHaveTextContent('13 DC');
     expect(screen.getByTestId('coin-transactions-list')).toBeInTheDocument();
-    expect(screen.getByText('Completed 25-minute focus session')).toBeInTheDocument();
+    expect(screen.getByText('Completed 25-minute focus session (+10 DC)')).toBeInTheDocument();
+    expect(screen.getByText('Completed short break (+1 DC)')).toBeInTheDocument();
+    expect(screen.getByText('Completed long break (+2 DC)')).toBeInTheDocument();
 
     const closeBtn = screen.getByTestId('close-coin-history-btn');
     fireEvent.click(closeBtn);

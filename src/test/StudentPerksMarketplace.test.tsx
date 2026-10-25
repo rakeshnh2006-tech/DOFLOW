@@ -10,7 +10,7 @@ const MOCK_PERKS: DigitalPerk[] = [
     title: 'Nordic Midnight Theme',
     description: 'Cool slate blue and deep midnight aesthetic.',
     category: 'themes',
-    coinCost: 100,
+    coinCost: 60,
     assetKey: 'nordic',
     icon: '🌌',
     previewColor: '#0F172A',
@@ -21,7 +21,7 @@ const MOCK_PERKS: DigitalPerk[] = [
     title: 'Deep Ocean Waves',
     description: 'Soothing coastal tides and gentle surf.',
     category: 'sounds',
-    coinCost: 100,
+    coinCost: 60,
     assetKey: 'ocean',
     icon: '🌊',
     previewColor: '#0284C7',
@@ -32,7 +32,7 @@ const MOCK_PERKS: DigitalPerk[] = [
     title: 'Dean\'s List Scholar Badge',
     description: 'Exclusive academic flair badged on your profile.',
     category: 'badges',
-    coinCost: 100,
+    coinCost: 60,
     assetKey: 'scholar',
     icon: '🎓',
     previewColor: '#7C3AED',
@@ -43,7 +43,7 @@ const MOCK_PERKS: DigitalPerk[] = [
     title: 'Zen Singing Bowl Chime',
     description: 'Tibetan singing bowl tone replacing bell.',
     category: 'customization',
-    coinCost: 100,
+    coinCost: 60,
     assetKey: 'zen_bowl',
     icon: '🔔',
     previewColor: '#10B981',
@@ -81,7 +81,7 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
     };
   });
 
-  it('1. renders prominent Doflow Coin balance and progress indicator towards next 100 DC', () => {
+  it('1. renders prominent Doflow Coin balance and progress indicator towards next 60 DC', () => {
     render(
       <StudentPerksMarketplace
         coinBalance={45}
@@ -97,11 +97,11 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
     // Prominent balance display
     expect(screen.getByTestId('perks-balance-display')).toHaveTextContent('45');
 
-    // Progress box towards next 100 DC milestone
+    // Progress box towards next 60 DC milestone
     const progressBox = screen.getByTestId('perks-progress-indicator');
     expect(progressBox).toBeInTheDocument();
-    expect(progressBox).toHaveTextContent('45 / 100 DC');
-    expect(progressBox).toHaveTextContent('55 DC needed for your next 100-coin unlock');
+    expect(progressBox).toHaveTextContent('45 / 60 DC');
+    expect(progressBox).toHaveTextContent('15 DC needed for your next 60-coin unlock');
 
     // Transaction History button
     const historyBtn = screen.getByTestId('perks-history-button');
@@ -109,10 +109,10 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
     expect(mockOpenHistory).toHaveBeenCalledTimes(1);
   });
 
-  it('2. indicates ready reward unlock when user has exactly or more than 100 DC milestone', () => {
+  it('2. indicates ready reward unlock when user has exactly or more than 60 DC milestone', () => {
     render(
       <StudentPerksMarketplace
-        coinBalance={100}
+        coinBalance={60}
         isAuthenticated={true}
         currentTheme="light"
         onSetTheme={mockSetTheme}
@@ -123,8 +123,8 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
     );
 
     const progressBox = screen.getByTestId('perks-progress-indicator');
-    expect(progressBox).toHaveTextContent('100 / 100 DC (Reward Available!)');
-    expect(progressBox).toHaveTextContent('You have enough coins to redeem a 100 DC reward now!');
+    expect(progressBox).toHaveTextContent('60 / 60 DC (Reward Available!)');
+    expect(progressBox).toHaveTextContent('You have enough coins to redeem a 60 DC reward now!');
   });
 
   it('3. renders category filter pills and updates selected category on click', () => {
@@ -189,7 +189,7 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
     expect(mockNavigateToLogin).toHaveBeenCalledTimes(1);
   });
 
-  it('6. disables redemption button with clear insufficient balance indicator when balance < 100 DC', () => {
+  it('6. disables redemption button with clear insufficient balance indicator when balance < 60 DC', () => {
     render(
       <StudentPerksMarketplace
         coinBalance={30}
@@ -204,14 +204,14 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
 
     const insufficientBtn = screen.getByTestId('insufficient-btn-theme_nordic');
     expect(insufficientBtn).toBeInTheDocument();
-    expect(insufficientBtn).toHaveTextContent('Need 70 more DC');
+    expect(insufficientBtn).toHaveTextContent('Need 30 more DC');
     expect(insufficientBtn).toBeDisabled();
   });
 
-  it('7. enables redemption button when balance >= 100 DC and triggers redemption on click', () => {
+  it('7. enables redemption button when balance >= 60 DC and triggers redemption on click', () => {
     render(
       <StudentPerksMarketplace
-        coinBalance={100}
+        coinBalance={60}
         isAuthenticated={true}
         currentTheme="light"
         onSetTheme={mockSetTheme}
@@ -223,7 +223,7 @@ describe('StudentPerksMarketplace UI Acceptance Tests', () => {
 
     const redeemBtn = screen.getByTestId('redeem-btn-theme_nordic');
     expect(redeemBtn).toBeInTheDocument();
-    expect(redeemBtn).toHaveTextContent('Redeem for 100 DC');
+    expect(redeemBtn).toHaveTextContent('Redeem for 60 DC');
     expect(redeemBtn).not.toBeDisabled();
 
     fireEvent.click(redeemBtn);

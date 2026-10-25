@@ -19,8 +19,8 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
     database.close();
   });
 
-  // Acceptance Test 1: One eligible completed session awards one coin
-  it('1. awards exactly one coin for an eligible 25-minute focus session completion', () => {
+  // Acceptance Test 1: One eligible completed session awards 10 coins
+  it('1. awards exactly 10 coins for an eligible 25-minute focus session completion', () => {
     const userId = 'user-alice-123';
     const session = engine.startSession({
       userId,
@@ -39,27 +39,27 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
     });
 
     expect(result.success).toBe(true);
-    expect(result.coinsAwarded).toBe(1);
-    expect(result.newBalance).toBe(1);
-    expect(result.lifetimeEarned).toBe(1);
+    expect(result.coinsAwarded).toBe(10);
+    expect(result.newBalance).toBe(10);
+    expect(result.lifetimeEarned).toBe(10);
     expect(result.duplicate).toBeFalsy();
 
     // Verify balance query
     const balance = engine.getBalance(userId);
-    expect(balance.balance).toBe(1);
-    expect(balance.lifetimeEarned).toBe(1);
+    expect(balance.balance).toBe(10);
+    expect(balance.lifetimeEarned).toBe(10);
     expect(balance.lifetimeSpent).toBe(0);
 
     // Verify append-only transaction ledger
     const transactions = engine.getTransactions(userId);
     expect(transactions).toHaveLength(1);
-    expect(transactions[0].amount).toBe(1);
+    expect(transactions[0].amount).toBe(10);
     expect(transactions[0].type).toBe('earned_focus');
     expect(transactions[0].sessionId).toBe(session.id);
-    expect(transactions[0].balanceAfter).toBe(1);
+    expect(transactions[0].balanceAfter).toBe(10);
   });
 
-  // Acceptance Test 2: Duplicate completion requests award only one coin
+  // Acceptance Test 2: Duplicate completion requests award zero additional coins
   it('2. duplicate or replayed completion requests award zero additional coins', () => {
     const userId = 'user-bob-456';
     const session = engine.startSession({
@@ -75,8 +75,8 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
       skipElapsedCheckForTesting: true,
     });
     expect(firstResult.success).toBe(true);
-    expect(firstResult.coinsAwarded).toBe(1);
-    expect(firstResult.newBalance).toBe(1);
+    expect(firstResult.coinsAwarded).toBe(10);
+    expect(firstResult.newBalance).toBe(10);
 
     // Second completion (duplicate replay)
     const secondResult = engine.completeSession({
@@ -87,7 +87,7 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
     expect(secondResult.success).toBe(false);
     expect(secondResult.duplicate).toBe(true);
     expect(secondResult.coinsAwarded).toBe(0);
-    expect(secondResult.newBalance).toBe(1);
+    expect(secondResult.newBalance).toBe(10);
 
     // Third completion (replayed again)
     const thirdResult = engine.completeSession({
@@ -98,9 +98,9 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
     expect(thirdResult.duplicate).toBe(true);
     expect(thirdResult.coinsAwarded).toBe(0);
 
-    // Final balance and ledger must only reflect 1 coin
+    // Final balance and ledger must only reflect 10 coins
     const balance = engine.getBalance(userId);
-    expect(balance.balance).toBe(1);
+    expect(balance.balance).toBe(10);
 
     const transactions = engine.getTransactions(userId);
     expect(transactions).toHaveLength(1);
@@ -153,14 +153,14 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
       const engine1 = new CoinEngine(db1);
       const userId = 'user-persist-101';
 
-      // Earn 2 coins across 2 distinct sessions
+      // Earn 20 coins across 2 distinct sessions (10 coins each)
       const s1 = engine1.startSession({ userId, mode: 'focus', durationMs: MIN_FOCUS_DURATION_MS });
       engine1.completeSession({ userId, sessionId: s1.id, skipElapsedCheckForTesting: true });
 
       const s2 = engine1.startSession({ userId, mode: 'focus', durationMs: MIN_FOCUS_DURATION_MS });
       engine1.completeSession({ userId, sessionId: s2.id, skipElapsedCheckForTesting: true });
 
-      expect(engine1.getBalance(userId).balance).toBe(2);
+      expect(engine1.getBalance(userId).balance).toBe(20);
       db1.close();
 
       // Simulate browser reload / reconnecting to persistent storage
@@ -168,13 +168,13 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
       const engine2 = new CoinEngine(db2);
 
       const restoredBalance = engine2.getBalance(userId);
-      expect(restoredBalance.balance).toBe(2);
-      expect(restoredBalance.lifetimeEarned).toBe(2);
+      expect(restoredBalance.balance).toBe(20);
+      expect(restoredBalance.lifetimeEarned).toBe(20);
 
       const restoredTransactions = engine2.getTransactions(userId);
       expect(restoredTransactions).toHaveLength(2);
-      expect(restoredTransactions[0].amount).toBe(1);
-      expect(restoredTransactions[1].amount).toBe(1);
+      expect(restoredTransactions[0].amount).toBe(10);
+      expect(restoredTransactions[1].amount).toBe(10);
 
       db2.close();
     } finally {
@@ -189,7 +189,7 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
     const userA = 'user-victim-aaa';
     const userB = 'user-attacker-bbb';
 
-    // User A earns 1 coin
+    // User A earns 10 coins
     const sessionA = engine.startSession({
       userId: userA,
       mode: 'focus',
@@ -199,7 +199,7 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
 
     // User B starts with 0
     expect(engine.getBalance(userB).balance).toBe(0);
-    expect(engine.getBalance(userA).balance).toBe(1);
+    expect(engine.getBalance(userA).balance).toBe(10);
 
     // User B attempts to complete User A's session to claim a coin
     const attackResult = engine.completeSession({
@@ -217,8 +217,8 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
       engine.abandonSession({ userId: userB, sessionId: sessionA.id });
     }).toThrow(/Unauthorized/);
 
-    // User A's balance remains 1; User B's balance remains 0
-    expect(engine.getBalance(userA).balance).toBe(1);
+    // User A's balance remains 10; User B's balance remains 0
+    expect(engine.getBalance(userA).balance).toBe(10);
     expect(engine.getBalance(userB).balance).toBe(0);
   });
 
@@ -244,43 +244,76 @@ describe('Doflow Coins — Stage 2: Secure Coin Engine Acceptance Tests', () => 
 
     const results = await Promise.all(concurrentRequests);
 
-    const successfulAwards = results.filter((r) => r.success && r.coinsAwarded === 1);
+    const successfulAwards = results.filter((r) => r.success && r.coinsAwarded === 10);
     const duplicates = results.filter((r) => r.duplicate);
 
-    // Exactly one must succeed with 1 coin
+    // Exactly one must succeed with 10 coins
     expect(successfulAwards).toHaveLength(1);
     // The remaining 9 must be flagged as duplicates with 0 coins
     expect(duplicates).toHaveLength(9);
 
-    // Final balance is strictly 1
+    // Final balance is strictly 10
     const finalBalance = engine.getBalance(userId);
-    expect(finalBalance.balance).toBe(1);
-    expect(finalBalance.lifetimeEarned).toBe(1);
+    expect(finalBalance.balance).toBe(10);
+    expect(finalBalance.lifetimeEarned).toBe(10);
 
     // Only 1 transaction in ledger
     const transactions = engine.getTransactions(userId);
     expect(transactions).toHaveLength(1);
   });
 
-  // Additional Rule Validations
-  it('does not award coins for short or long breaks', () => {
+  // Short and Long Break Rewards
+  it('awards 1 coin for completing a short break and 2 coins for completing a long break', () => {
     const userId = 'user-breaks';
+
+    // 1. Short break earns 1 coin
     const shortBreakSession = engine.startSession({
       userId,
       mode: 'shortBreak',
       durationMs: 5 * 60 * 1000,
     });
 
-    const result = engine.completeSession({
+    const shortResult = engine.completeSession({
       userId,
       sessionId: shortBreakSession.id,
       skipElapsedCheckForTesting: true,
     });
 
-    expect(result.success).toBe(false);
-    expect(result.coinsAwarded).toBe(0);
-    expect(result.error).toContain('Breaks are not eligible');
-    expect(engine.getBalance(userId).balance).toBe(0);
+    expect(shortResult.success).toBe(true);
+    expect(shortResult.coinsAwarded).toBe(1);
+    expect(shortResult.newBalance).toBe(1);
+    expect(shortResult.transaction?.type).toBe('earned_break');
+    expect(engine.getBalance(userId).balance).toBe(1);
+
+    // 2. Long break earns 2 coins
+    const longBreakSession = engine.startSession({
+      userId,
+      mode: 'longBreak',
+      durationMs: 15 * 60 * 1000,
+    });
+
+    const longResult = engine.completeSession({
+      userId,
+      sessionId: longBreakSession.id,
+      skipElapsedCheckForTesting: true,
+    });
+
+    expect(longResult.success).toBe(true);
+    expect(longResult.coinsAwarded).toBe(2);
+    expect(longResult.newBalance).toBe(3);
+    expect(longResult.transaction?.type).toBe('earned_break');
+    expect(engine.getBalance(userId).balance).toBe(3);
+
+    // 3. Duplicate completion on a break session earns 0 coins
+    const duplicateBreakResult = engine.completeSession({
+      userId,
+      sessionId: longBreakSession.id,
+      skipElapsedCheckForTesting: true,
+    });
+    expect(duplicateBreakResult.success).toBe(false);
+    expect(duplicateBreakResult.duplicate).toBe(true);
+    expect(duplicateBreakResult.coinsAwarded).toBe(0);
+    expect(engine.getBalance(userId).balance).toBe(3);
   });
 
   it('does not award coins for focus sessions under 25 minutes', () => {

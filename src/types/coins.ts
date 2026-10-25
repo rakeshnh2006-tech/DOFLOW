@@ -2,7 +2,13 @@ export type TimerSessionMode = 'focus' | 'shortBreak' | 'longBreak';
 
 export type SessionServerStatus = 'active' | 'completed' | 'abandoned';
 
-export type CoinTransactionType = 'earned_focus' | 'redeemed_perk' | 'adjustment';
+export type CoinTransactionType = 'earned_focus' | 'earned_break' | 'redeemed_perk' | 'adjustment';
+
+export const DEFAULT_PERK_PRICE = 60;
+export const DEFAULT_MILESTONE_DC = 60;
+export const FOCUS_SESSION_COIN_REWARD = 10;
+export const SHORT_BREAK_COIN_REWARD = 1;
+export const LONG_BREAK_COIN_REWARD = 2;
 
 export type PerkCategory = 'themes' | 'sounds' | 'badges' | 'customization';
 

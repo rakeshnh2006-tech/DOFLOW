@@ -3,6 +3,7 @@ import type { DoflowDatabase } from '../db/database.js';
 import type {
   CoinBalance,
   CoinTransaction,
+  CoinTransactionType,
   CompleteSessionResponse,
   CreatePartnerOfferInput,
   DigitalPerk,
@@ -238,29 +239,64 @@ export class CoinEngine {
         };
       }
 
-      // 6. Mode check: Breaks are not eligible
-      if (session.mode !== 'focus') {
+      // 6. Mode & duration checks:
+      // Focus: 10 DC (min 25 min)
+      // Short break: 1 DC
+      // Long break: 2 DC
+      let coinsToAward: number;
+      let txType: CoinTransactionType;
+      let txDesc: string;
+
+      if (session.mode === 'focus') {
+        if (session.duration_ms < MIN_FOCUS_DURATION_MS) {
+          return {
+            success: false,
+            coinsAwarded: 0,
+            newBalance: currentBalance,
+            lifetimeEarned: currentLifetime,
+            error: 'Only focus sessions of at least 25 minutes earn Doflow Coins.',
+          };
+        }
+        coinsToAward = 10;
+        txType = 'earned_focus';
+        txDesc = 'Completed 25-minute focus session (+10 DC)';
+      } else if (session.mode === 'shortBreak') {
+        if (session.duration_ms <= 0) {
+          return {
+            success: false,
+            coinsAwarded: 0,
+            newBalance: currentBalance,
+            lifetimeEarned: currentLifetime,
+            error: 'Invalid short break duration.',
+          };
+        }
+        coinsToAward = 1;
+        txType = 'earned_break';
+        txDesc = 'Completed short break (+1 DC)';
+      } else if (session.mode === 'longBreak') {
+        if (session.duration_ms <= 0) {
+          return {
+            success: false,
+            coinsAwarded: 0,
+            newBalance: currentBalance,
+            lifetimeEarned: currentLifetime,
+            error: 'Invalid long break duration.',
+          };
+        }
+        coinsToAward = 2;
+        txType = 'earned_break';
+        txDesc = 'Completed long break (+2 DC)';
+      } else {
         return {
           success: false,
           coinsAwarded: 0,
           newBalance: currentBalance,
           lifetimeEarned: currentLifetime,
-          error: 'Only focus sessions earn Doflow Coins. Breaks are not eligible.',
+          error: 'Only focus sessions and break sessions earn Doflow Coins.',
         };
       }
 
-      // 7. Duration check: Must be at least 25 minutes (1,500,000 ms)
-      if (session.duration_ms < MIN_FOCUS_DURATION_MS) {
-        return {
-          success: false,
-          coinsAwarded: 0,
-          newBalance: currentBalance,
-          lifetimeEarned: currentLifetime,
-          error: 'Only focus sessions of at least 25 minutes earn Doflow Coins.',
-        };
-      }
-
-      // 8. Server-side elapsed time verification
+      // 7. Server-side elapsed time verification
       const now = Date.now();
       if (!skipElapsedCheckForTesting) {
         const elapsedMs = now - session.started_at;
@@ -276,7 +312,7 @@ export class CoinEngine {
         }
       }
 
-      // 9. All business validations passed: execute atomic reward
+      // 8. All business validations passed: execute atomic reward
       // Update session status
       db.prepare(
         "UPDATE focus_sessions SET status = 'completed', completed_at = ? WHERE id = ?"
@@ -284,31 +320,31 @@ export class CoinEngine {
 
       // Record reward (unique primary key on session_id prevents any duplicate insert)
       db.prepare(
-        'INSERT INTO focus_session_rewards (session_id, user_id, coins_awarded, awarded_at) VALUES (?, ?, 1, ?)'
-      ).run(sessionId, userId, now);
+        'INSERT INTO focus_session_rewards (session_id, user_id, coins_awarded, awarded_at) VALUES (?, ?, ?, ?)'
+      ).run(sessionId, userId, coinsToAward, now);
 
       // Update coin balance atomically
-      const newBalance = currentBalance + 1;
-      const newLifetime = currentLifetime + 1;
+      const newBalance = currentBalance + coinsToAward;
+      const newLifetime = currentLifetime + coinsToAward;
 
       db.prepare(
         `INSERT INTO coin_balances (user_id, balance, lifetime_earned, lifetime_spent, updated_at)
          VALUES (?, ?, ?, 0, ?)
          ON CONFLICT(user_id) DO UPDATE SET
-           balance = balance + 1,
-           lifetime_earned = lifetime_earned + 1,
+           balance = balance + ?,
+           lifetime_earned = lifetime_earned + ?,
            updated_at = excluded.updated_at`
-      ).run(userId, newBalance, newLifetime, now);
+      ).run(userId, newBalance, newLifetime, now, coinsToAward, coinsToAward);
 
       // Append transaction to immutable ledger
       const transactionId = randomUUID();
       const transaction: CoinTransaction = {
         id: transactionId,
         userId,
-        amount: 1,
-        type: 'earned_focus',
+        amount: coinsToAward,
+        type: txType,
         sessionId,
-        description: 'Completed 25-minute focus session',
+        description: txDesc,
         balanceAfter: newBalance,
         timestamp: now,
       };
@@ -320,20 +356,25 @@ export class CoinEngine {
       ).run(
         transactionId,
         userId,
-        1,
-        'earned_focus',
+        coinsToAward,
+        txType,
         sessionId,
-        'Completed 25-minute focus session',
+        txDesc,
         newBalance,
         now
       );
 
+      const successMsg =
+        coinsToAward === 1
+          ? 'Successfully earned 1 Doflow Coin!'
+          : `Successfully earned ${coinsToAward} Doflow Coins!`;
+
       return {
         success: true,
-        coinsAwarded: 1,
+        coinsAwarded: coinsToAward,
         newBalance,
         lifetimeEarned: newLifetime,
-        message: 'Successfully earned 1 Doflow Coin!',
+        message: successMsg,
         transaction,
       };
     });
@@ -1011,7 +1052,7 @@ export class CoinEngine {
       partnerName,
       title,
       description,
-      coinCost = 100,
+      coinCost = 60,
       startDate,
       endDate,
       status = 'active',

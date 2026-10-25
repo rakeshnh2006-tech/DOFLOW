@@ -35,7 +35,7 @@ export const AdminPartnerOffersModal: React.FC<AdminPartnerOffersModalProps> = (
   const [partnerName, setPartnerName] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [coinCost, setCoinCost] = useState<number>(100);
+  const [coinCost, setCoinCost] = useState<number>(60);
   const [totalLimit, setTotalLimit] = useState<string>('');
   const [perUserLimit, setPerUserLimit] = useState<number>(1);
   const [terms, setTerms] = useState<string>('');
@@ -74,7 +74,7 @@ export const AdminPartnerOffersModal: React.FC<AdminPartnerOffersModalProps> = (
       partnerName,
       title,
       description,
-      coinCost: Number(coinCost) || 100,
+      coinCost: Number(coinCost) || 60,
       startDate: now,
       endDate,
       status: tokens.length > 0 ? 'active' : 'out_of_stock',

@@ -152,13 +152,19 @@ export const App: React.FC = () => {
 
   const handleTimerComplete = useCallback(
     (mode: TimerMode, durationMs?: number) => {
-      // Default to 25 min if durationMs not provided
-      const resolvedDurationMs = durationMs ?? 25 * 60 * 1000;
+      // Default to mode default duration if not provided
+      const defaultDuration =
+        mode === 'focus'
+          ? 25 * 60 * 1000
+          : mode === 'longBreak'
+          ? 15 * 60 * 1000
+          : 5 * 60 * 1000;
+      const resolvedDurationMs = durationMs ?? defaultDuration;
       const record = statsState.recordCompletedSession(mode, resolvedDurationMs);
       if (record && record.mode === 'focus') {
         intelligenceState.promptSessionReflection(record.id);
-        coinsState.completeSession(mode, resolvedDurationMs);
       }
+      coinsState.completeSession(mode, resolvedDurationMs);
     },
     [statsState, intelligenceState, coinsState]
   );

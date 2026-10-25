@@ -38,8 +38,8 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       });
 
       expect(firstResult.success).toBe(true);
-      expect(firstResult.coinsAwarded).toBe(1);
-      expect(firstResult.newBalance).toBe(1);
+      expect(firstResult.coinsAwarded).toBe(10);
+      expect(firstResult.newBalance).toBe(10);
 
       // Replay attempt 1: immediate replay with identical payload
       const replayResult1 = engine.completeSession({
@@ -51,7 +51,7 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       expect(replayResult1.success).toBe(false);
       expect(replayResult1.duplicate).toBe(true);
       expect(replayResult1.coinsAwarded).toBe(0);
-      expect(replayResult1.newBalance).toBe(1);
+      expect(replayResult1.newBalance).toBe(10);
 
       // Replay attempt 2: third repeat request
       const replayResult2 = engine.completeSession({
@@ -63,7 +63,7 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       expect(replayResult2.success).toBe(false);
       expect(replayResult2.duplicate).toBe(true);
       expect(replayResult2.coinsAwarded).toBe(0);
-      expect(replayResult2.newBalance).toBe(1);
+      expect(replayResult2.newBalance).toBe(10);
 
       // Verify exact database state
       const rewardRows = dbWrapper.db
@@ -117,23 +117,41 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       expect(balance.balance).toBe(0);
     });
 
-    it('rejects completion for break sessions (breaks do not earn coins)', () => {
+    it('awards 1 coin for short breaks and 2 coins for long breaks, rejecting replays', () => {
       const userId = 'student_audit_02_break';
-      const session = engine.startSession({
+      const shortSession = engine.startSession({
         userId,
         mode: 'shortBreak',
         durationMs: 5 * 60 * 1000,
       });
 
-      const result = engine.completeSession({
+      const shortResult = engine.completeSession({
         userId,
-        sessionId: session.id,
+        sessionId: shortSession.id,
         skipElapsedCheckForTesting: true,
       });
 
-      expect(result.success).toBe(false);
-      expect(result.coinsAwarded).toBe(0);
-      expect(result.error).toMatch(/Only focus sessions earn Doflow Coins/i);
+      expect(shortResult.success).toBe(true);
+      expect(shortResult.coinsAwarded).toBe(1);
+      expect(shortResult.newBalance).toBe(1);
+      expect(shortResult.transaction?.type).toBe('earned_break');
+
+      const longSession = engine.startSession({
+        userId,
+        mode: 'longBreak',
+        durationMs: 15 * 60 * 1000,
+      });
+
+      const longResult = engine.completeSession({
+        userId,
+        sessionId: longSession.id,
+        skipElapsedCheckForTesting: true,
+      });
+
+      expect(longResult.success).toBe(true);
+      expect(longResult.coinsAwarded).toBe(2);
+      expect(longResult.newBalance).toBe(3);
+      expect(longResult.transaction?.type).toBe('earned_break');
     });
 
     it('rejects premature completion when server-side elapsed time is not met', () => {
@@ -296,12 +314,12 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       const userId = 'student_concurrency_01';
       engine.ensureUser(userId);
 
-      // Set exactly 100 DC balance
+      // Set exactly 60 DC balance
       dbWrapper.db
-        .prepare('UPDATE coin_balances SET balance = 100, lifetime_earned = 100 WHERE user_id = ?')
+        .prepare('UPDATE coin_balances SET balance = 60, lifetime_earned = 60 WHERE user_id = ?')
         .run(userId);
 
-      // Attempt two redemptions of 100 DC items in sequence/overlap
+      // Attempt two redemptions of 60 DC items in sequence/overlap
       const res1 = engine.redeemPerk({ userId, perkId: 'theme_nordic' });
       const res2 = engine.redeemPerk({ userId, perkId: 'theme_forest' });
 
@@ -479,10 +497,10 @@ describe('Stage 5: Security Audit and Release Validation', () => {
         .prepare('UPDATE coin_balances SET balance = 300 WHERE user_id = ?')
         .run(userId);
 
-      // Redeem theme_sunset
+      // Redeem theme_sunset (60 DC)
       const firstClaim = engine.redeemPerk({ userId, perkId: 'theme_sunset' });
       expect(firstClaim.success).toBe(true);
-      expect(firstClaim.newBalance).toBe(200);
+      expect(firstClaim.newBalance).toBe(240);
 
       // Ownership list
       const ownedIds = engine.getUserOwnedPerkIds(userId);
@@ -492,7 +510,7 @@ describe('Stage 5: Security Audit and Release Validation', () => {
       const secondClaim = engine.redeemPerk({ userId, perkId: 'theme_sunset' });
       expect(secondClaim.success).toBe(false);
       expect(secondClaim.alreadyOwned).toBe(true);
-      expect(secondClaim.newBalance).toBe(200); // 0 coins deducted
+      expect(secondClaim.newBalance).toBe(240); // 0 coins deducted
     });
   });
 

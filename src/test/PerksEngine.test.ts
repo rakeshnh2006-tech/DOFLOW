@@ -35,7 +35,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
       .run(`credit-${Date.now()}-${Math.random()}`, userId, coins, coins, now);
   };
 
-  it('1. retrieves the full seeded rewards catalogue with default 100 DC pricing', () => {
+  it('1. retrieves the full seeded rewards catalogue with default 60 DC pricing', () => {
     const perks = engine.getPerksCatalogue();
     expect(perks.length).toBeGreaterThanOrEqual(8);
 
@@ -45,21 +45,21 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     expect(categories.has('badges')).toBe(true);
     expect(categories.has('customization')).toBe(true);
 
-    // Verify all seeded rewards have the default 100 DC price
+    // Verify all seeded rewards have the default 60 DC price
     for (const perk of perks) {
-      expect(perk.coinCost).toBe(100);
+      expect(perk.coinCost).toBe(60);
       expect(perk.isActive).toBe(true);
       expect(perk.title).toBeTruthy();
       expect(perk.description).toBeTruthy();
     }
   });
 
-  it('2. executes successful redemption atomically: deducts 100 DC and records permanent ownership', () => {
+  it('2. executes successful redemption atomically: deducts 60 DC and records permanent ownership', () => {
     const userId = 'student-alice-456';
-    creditCoins(userId, 100);
+    creditCoins(userId, 60);
 
     const initialBalance = engine.getBalance(userId);
-    expect(initialBalance.balance).toBe(100);
+    expect(initialBalance.balance).toBe(60);
 
     // Redeem 'theme_nordic'
     const result = engine.redeemPerk({
@@ -75,7 +75,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     // Verify user balance is updated in database
     const updatedBalance = engine.getBalance(userId);
     expect(updatedBalance.balance).toBe(0);
-    expect(updatedBalance.lifetimeSpent).toBe(100);
+    expect(updatedBalance.lifetimeSpent).toBe(60);
 
     // Verify ownership list contains the redeemed perk
     const ownedIds = engine.getUserOwnedPerkIds(userId);
@@ -85,14 +85,14 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     const transactions = engine.getTransactions(userId);
     const redeemTx = transactions.find((t) => t.type === 'redeemed_perk');
     expect(redeemTx).toBeDefined();
-    expect(redeemTx?.amount).toBe(-100);
+    expect(redeemTx?.amount).toBe(-60);
     expect(redeemTx?.balanceAfter).toBe(0);
     expect(redeemTx?.description).toContain('Nordic Midnight Theme');
   });
 
   it('3. rejects redemption when user has insufficient balance and deducts 0 coins', () => {
     const userId = 'student-broke-101';
-    creditCoins(userId, 50); // Has 50 DC, but item costs 100 DC
+    creditCoins(userId, 30); // Has 30 DC, but item costs 60 DC
 
     const result = engine.redeemPerk({
       userId,
@@ -102,11 +102,11 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     expect(result.success).toBe(false);
     expect(result.insufficientBalance).toBe(true);
     expect(result.error).toContain('Insufficient Doflow Coins');
-    expect(result.newBalance).toBe(50);
+    expect(result.newBalance).toBe(30);
 
     // Verify balance was never deducted
     const balance = engine.getBalance(userId);
-    expect(balance.balance).toBe(50);
+    expect(balance.balance).toBe(30);
     expect(balance.lifetimeSpent).toBe(0);
 
     // Verify perk was NOT added to owned list
@@ -121,7 +121,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
 
   it('4. rejects repeated redemption of an already owned permanent reward', () => {
     const userId = 'student-charlie-789';
-    creditCoins(userId, 300); // 300 DC
+    creditCoins(userId, 180); // 180 DC
 
     // First redemption succeeds
     const firstResult = engine.redeemPerk({
@@ -129,7 +129,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
       perkId: 'theme_sunset',
     });
     expect(firstResult.success).toBe(true);
-    expect(firstResult.newBalance).toBe(200);
+    expect(firstResult.newBalance).toBe(120);
 
     // Second redemption of the SAME perk must be rejected
     const repeatResult = engine.redeemPerk({
@@ -140,12 +140,12 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     expect(repeatResult.success).toBe(false);
     expect(repeatResult.alreadyOwned).toBe(true);
     expect(repeatResult.error).toContain('already own');
-    expect(repeatResult.newBalance).toBe(200);
+    expect(repeatResult.newBalance).toBe(120);
 
-    // Balance remains 200 DC (no double deduction)
+    // Balance remains 120 DC (no double deduction)
     const balance = engine.getBalance(userId);
-    expect(balance.balance).toBe(200);
-    expect(balance.lifetimeSpent).toBe(100);
+    expect(balance.balance).toBe(120);
+    expect(balance.lifetimeSpent).toBe(60);
 
     // Exactly one ownership entry exists
     const owned = engine.getUserOwnedPerkIds(userId);
@@ -163,11 +163,11 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     const engine1 = new CoinEngine(db1);
 
     engine1.ensureUser(userId);
-    db1.db.prepare('UPDATE coin_balances SET balance = 200, lifetime_earned = 200 WHERE user_id = ?').run(userId);
+    db1.db.prepare('UPDATE coin_balances SET balance = 120, lifetime_earned = 120 WHERE user_id = ?').run(userId);
 
     const res = engine1.redeemPerk({ userId, perkId: 'badge_student_scholar' });
     expect(res.success).toBe(true);
-    expect(res.newBalance).toBe(100);
+    expect(res.newBalance).toBe(60);
 
     db1.close();
 
@@ -176,8 +176,8 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     const engine2 = new CoinEngine(db2);
 
     const balanceAfterReload = engine2.getBalance(userId);
-    expect(balanceAfterReload.balance).toBe(100);
-    expect(balanceAfterReload.lifetimeSpent).toBe(100);
+    expect(balanceAfterReload.balance).toBe(60);
+    expect(balanceAfterReload.lifetimeSpent).toBe(60);
 
     const ownedAfterReload = engine2.getUserOwnedPerkIds(userId);
     expect(ownedAfterReload).toContain('badge_student_scholar');
@@ -193,8 +193,8 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     const userA = 'account-alice';
     const userB = 'account-bob';
 
-    creditCoins(userA, 100);
-    creditCoins(userB, 100);
+    creditCoins(userA, 60);
+    creditCoins(userB, 60);
 
     // User A redeems theme_nordic
     const resA = engine.redeemPerk({ userId: userA, perkId: 'theme_nordic' });
@@ -203,7 +203,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     expect(engine.getUserOwnedPerkIds(userA)).toContain('theme_nordic');
 
     // Switch account to User B
-    expect(engine.getBalance(userB).balance).toBe(100);
+    expect(engine.getBalance(userB).balance).toBe(60);
     expect(engine.getUserOwnedPerkIds(userB)).not.toContain('theme_nordic');
 
     // User B can also redeem theme_nordic independently
@@ -219,10 +219,10 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
 
   it('7. prevents concurrent double spending with simultaneous redemption requests', async () => {
     const userId = 'student-double-spender';
-    // Exactly 100 DC in account: enough for ONLY ONE 100 DC reward
-    creditCoins(userId, 100);
+    // Exactly 60 DC in account: enough for ONLY ONE 60 DC reward
+    creditCoins(userId, 60);
 
-    // Fire two simultaneous redemption requests for two different 100 DC items
+    // Fire two simultaneous redemption requests for two different 60 DC items
     const promise1 = Promise.resolve().then(() =>
       engine.redeemPerk({ userId, perkId: 'sound_ocean' })
     );
@@ -245,7 +245,7 @@ describe('Doflow Student Perks — Stage 3: Digital Rewards Marketplace Acceptan
     // The user balance must be exactly 0, never negative
     const finalBalance = engine.getBalance(userId);
     expect(finalBalance.balance).toBe(0);
-    expect(finalBalance.lifetimeSpent).toBe(100);
+    expect(finalBalance.lifetimeSpent).toBe(60);
 
     // Exactly one perk is owned
     const owned = engine.getUserOwnedPerkIds(userId);

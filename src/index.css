@@ -7919,11 +7919,26 @@ kbd {
 
 /* Coin History & Ledger Modal */
 .coin-history-modal-content {
+  background-color: var(--color-surface);
+  border: var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 26px 28px 24px;
   max-width: 580px;
-  width: 92%;
+  width: 94%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1001;
+  animation: scaleIn 150ms ease-out;
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .coin-history-modal-content {
+  background-color: var(--color-surface);
+  border-color: #2E323B;
+  box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.65);
 }
 
 .coin-modal-title-group {

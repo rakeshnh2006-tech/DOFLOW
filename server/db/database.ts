@@ -66,7 +66,7 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       amount INTEGER NOT NULL,
-      type TEXT NOT NULL CHECK(type IN ('earned_focus', 'redeemed_perk', 'adjustment')),
+      type TEXT NOT NULL CHECK(type IN ('earned_focus', 'earned_break', 'redeemed_perk', 'adjustment')),
       session_id TEXT REFERENCES focus_sessions(id) ON DELETE SET NULL,
       description TEXT NOT NULL,
       balance_after INTEGER NOT NULL CHECK(balance_after >= 0),
@@ -80,7 +80,7 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
       title TEXT NOT NULL,
       description TEXT NOT NULL,
       category TEXT NOT NULL,
-      coin_cost INTEGER NOT NULL DEFAULT 100 CHECK(coin_cost > 0),
+      coin_cost INTEGER NOT NULL DEFAULT 60 CHECK(coin_cost > 0),
       asset_key TEXT NOT NULL,
       icon TEXT NOT NULL,
       preview_color TEXT,
@@ -103,7 +103,7 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
       partner_name TEXT NOT NULL,
       title TEXT NOT NULL,
       description TEXT NOT NULL,
-      coin_cost INTEGER NOT NULL DEFAULT 100 CHECK(coin_cost > 0),
+      coin_cost INTEGER NOT NULL DEFAULT 60 CHECK(coin_cost > 0),
       start_date INTEGER NOT NULL,
       end_date INTEGER NOT NULL,
       status TEXT NOT NULL CHECK(status IN ('active', 'expired', 'paused', 'out_of_stock')),
@@ -148,16 +148,16 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
 
     CREATE INDEX IF NOT EXISTS idx_user_partner_redemptions_user ON user_partner_redemptions(user_id, offer_id);
 
-    -- Seed digital rewards catalogue (100 DC default, configurable)
+    -- Seed digital rewards catalogue (60 DC default, configurable)
     INSERT OR IGNORE INTO perks (id, title, description, category, coin_cost, asset_key, icon, preview_color, is_active) VALUES
-    ('theme_nordic', 'Nordic Midnight Theme', 'Cool slate blue and deep midnight aesthetic designed for restful late-night focus sessions.', 'themes', 100, 'nordic', '🌌', '#0F172A', 1),
-    ('theme_forest', 'Emerald Forest Theme', 'Calming deep moss and sage green environment inspired by serene woodland walks.', 'themes', 100, 'forest', '🌲', '#0E1B13', 1),
-    ('theme_sunset', 'Warm Terracotta Sunset Theme', 'Rich amber, bronze, and desert terracotta palette for warm, energizing concentration.', 'themes', 100, 'sunset', '🌅', '#1C1310', 1),
-    ('sound_ocean', 'Deep Ocean Waves Soundscape', 'Soothing coastal tides and gentle rolling ocean surf synthesized purely browser-native.', 'sounds', 100, 'ocean', '🌊', '#0284C7', 1),
-    ('sound_campfire', 'Cozy Campfire & Embers', 'Intimate hearth crackle and warm ambient wood embers synthesized via Web Audio.', 'sounds', 100, 'campfire', '🔥', '#EA580C', 1),
-    ('badge_student_scholar', 'Dean''s List Scholar Badge', 'Exclusive academic achievement flair badged on your user profile and daily planner.', 'badges', 100, 'scholar', '🎓', '#7C3AED', 1),
-    ('badge_century_master', 'Master of Focus Gold Seal', 'Prestige gold seal commemorating elite dedication to deep work and distraction resistance.', 'badges', 100, 'master', '🏆', '#F59E0B', 1),
-    ('custom_completion_chime', 'Zen Singing Bowl Chime', 'Resonant Tibetan singing bowl harmonic tone replacing the default completion bell.', 'customization', 100, 'zen_bowl', '🔔', '#10B981', 1);
+    ('theme_nordic', 'Nordic Midnight Theme', 'Cool slate blue and deep midnight aesthetic designed for restful late-night focus sessions.', 'themes', 60, 'nordic', '🌌', '#0F172A', 1),
+    ('theme_forest', 'Emerald Forest Theme', 'Calming deep moss and sage green environment inspired by serene woodland walks.', 'themes', 60, 'forest', '🌲', '#0E1B13', 1),
+    ('theme_sunset', 'Warm Terracotta Sunset Theme', 'Rich amber, bronze, and desert terracotta palette for warm, energizing concentration.', 'themes', 60, 'sunset', '🌅', '#1C1310', 1),
+    ('sound_ocean', 'Deep Ocean Waves Soundscape', 'Soothing coastal tides and gentle rolling ocean surf synthesized purely browser-native.', 'sounds', 60, 'ocean', '🌊', '#0284C7', 1),
+    ('sound_campfire', 'Cozy Campfire & Embers', 'Intimate hearth crackle and warm ambient wood embers synthesized via Web Audio.', 'sounds', 60, 'campfire', '🔥', '#EA580C', 1),
+    ('badge_student_scholar', 'Dean''s List Scholar Badge', 'Exclusive academic achievement flair badged on your user profile and daily planner.', 'badges', 60, 'scholar', '🎓', '#7C3AED', 1),
+    ('badge_century_master', 'Master of Focus Gold Seal', 'Prestige gold seal commemorating elite dedication to deep work and distraction resistance.', 'badges', 60, 'master', '🏆', '#F59E0B', 1),
+    ('custom_completion_chime', 'Zen Singing Bowl Chime', 'Resonant Tibetan singing bowl harmonic tone replacing the default completion bell.', 'customization', 60, 'zen_bowl', '🔔', '#10B981', 1);
 
     -- Seed pilot partner offer slot (Awaiting real partner code allocation, transparent coming-soon state)
     INSERT OR IGNORE INTO partner_offers (
@@ -167,7 +167,7 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
       'Campus Academic Partner Program',
       'University Academic Supplies & Printing Voucher',
       'Verified educational discount voucher pilot for eligible student study kits and printing supplies. (Awaiting active partner code allocation).',
-      100,
+      60,
       1704067200000,
       1893456000000,
       'out_of_stock',
@@ -182,6 +182,38 @@ export function initializeDatabase(dbPath?: string): DoflowDatabase {
       1704067200000
     );
   `);
+
+  // Non-destructive schema migration check for coin_transactions CHECK constraint
+  try {
+    const txTable = db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'coin_transactions'")
+      .get() as { sql: string } | undefined;
+    if (txTable && !txTable.sql.includes("'earned_break'")) {
+      db.exec(`
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE coin_transactions_migrated (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          amount INTEGER NOT NULL,
+          type TEXT NOT NULL CHECK(type IN ('earned_focus', 'earned_break', 'redeemed_perk', 'adjustment')),
+          session_id TEXT REFERENCES focus_sessions(id) ON DELETE SET NULL,
+          description TEXT NOT NULL,
+          balance_after INTEGER NOT NULL CHECK(balance_after >= 0),
+          timestamp INTEGER NOT NULL
+        );
+        INSERT INTO coin_transactions_migrated SELECT id, user_id, amount, type, session_id, description, balance_after, timestamp FROM coin_transactions;
+        DROP TABLE coin_transactions;
+        ALTER TABLE coin_transactions_migrated RENAME TO coin_transactions;
+        CREATE INDEX IF NOT EXISTS idx_coin_transactions_user ON coin_transactions(user_id, timestamp DESC);
+        PRAGMA foreign_keys = ON;
+      `);
+    }
+
+    // Migrate existing perks with 100 coin default to 60 coin
+    db.exec(`UPDATE perks SET coin_cost = 60 WHERE coin_cost = 100;`);
+  } catch {
+    // Graceful fallback if in read-only or early setup
+  }
 
   const runTransaction = <T>(fn: () => T): T => {
     db.exec('BEGIN IMMEDIATE;');

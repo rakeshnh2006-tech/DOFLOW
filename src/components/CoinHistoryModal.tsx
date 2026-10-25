@@ -56,7 +56,7 @@ export const CoinHistoryModal: React.FC<CoinHistoryModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="modal-content coin-history-modal-content"
+        className="modal-card coin-history-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
@@ -73,7 +73,7 @@ export const CoinHistoryModal: React.FC<CoinHistoryModalProps> = ({
           </div>
           <button
             type="button"
-            className="modal-close-btn"
+            className="btn-modal-close modal-close-btn"
             onClick={onClose}
             aria-label="Close coins ledger modal"
             data-testid="close-coin-history-btn"
@@ -134,7 +134,7 @@ export const CoinHistoryModal: React.FC<CoinHistoryModalProps> = ({
               <span className="coin-empty-icon" aria-hidden="true">⏳</span>
               <p className="coin-empty-text">No transactions recorded yet.</p>
               <p className="coin-empty-subtext">
-                Complete an eligible 25-minute focus session to earn your first Doflow Coin!
+                Complete an eligible focus session (10 DC) or break (1–2 DC) to earn Doflow Coins!
               </p>
             </div>
           ) : (
@@ -161,10 +161,10 @@ export const CoinHistoryModal: React.FC<CoinHistoryModalProps> = ({
           )}
         </div>
 
-        <div className="modal-footer">
+        <div className="modal-actions" style={{ marginTop: '20px' }}>
           <button
             type="button"
-            className="action-btn-secondary"
+            className="btn-secondary modal-btn"
             onClick={onClose}
           >
             Close

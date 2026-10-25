@@ -190,8 +190,11 @@ export function useCoins({ userId }: UseCoinsProps): UseCoinsReturn {
       activeSessionRef.current = null;
       setActiveServerSessionId(null);
 
-      // Only focus sessions can earn coins
-      if (mode !== 'focus' || durationMs < 25 * 60 * 1000) {
+      // Focus sessions require min 25 mins. Break sessions require positive duration.
+      if (mode === 'focus' && durationMs < 25 * 60 * 1000) {
+        return;
+      }
+      if ((mode === 'shortBreak' || mode === 'longBreak') && durationMs <= 0) {
         return;
       }
 
@@ -210,7 +213,7 @@ export function useCoins({ userId }: UseCoinsProps): UseCoinsReturn {
           setBalance(res.newBalance);
           setLifetimeEarned(res.lifetimeEarned);
           setRewardToast({
-            message: res.message || '+1 Doflow Coin earned! 🪙',
+            message: res.message || `+${res.coinsAwarded} Doflow Coin${res.coinsAwarded > 1 ? 's' : ''} earned! 🪙`,
             coins: res.coinsAwarded,
             id: Date.now(),
           });
@@ -223,7 +226,7 @@ export function useCoins({ userId }: UseCoinsProps): UseCoinsReturn {
           setError(res.error);
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Failed to award focus coins';
+        const msg = err instanceof Error ? err.message : 'Failed to award session coins';
         setError(msg);
       }
     },

@@ -51,12 +51,12 @@ describe('Coin API Router Tests', () => {
       engine
     );
     expect(completeRes.status).toBe(200);
-    expect((completeRes.body as { coinsAwarded: number }).coinsAwarded).toBe(1);
+    expect((completeRes.body as { coinsAwarded: number }).coinsAwarded).toBe(10);
 
     // 4. Query updated balance
     const balanceRes2 = await handleCoinsApiRequest('GET', '/api/coins/balance', headers, undefined, engine);
     expect(balanceRes2.status).toBe(200);
-    expect((balanceRes2.body as { balance: { balance: number } }).balance.balance).toBe(1);
+    expect((balanceRes2.body as { balance: { balance: number } }).balance.balance).toBe(10);
 
     // 5. Query transactions
     const transRes = await handleCoinsApiRequest('GET', '/api/coins/transactions', headers, undefined, engine);
