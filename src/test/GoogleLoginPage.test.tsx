@@ -49,8 +49,9 @@ describe('GoogleLoginPage Component', () => {
       expect(screen.queryByText('Dr. Maya Patel')).toBeNull();
       expect(screen.queryByText('Jordan Lee')).toBeNull();
 
-      // Check client config card exists
-      expect(screen.getByTestId('google-client-config-card')).toBeDefined();
+      // Verify developer config card and manual account expander are removed from display
+      expect(screen.queryByTestId('google-client-config-card')).toBeNull();
+      expect(screen.queryByTestId('toggle-custom-form-btn')).toBeNull();
 
       // Check features grid
       expect(screen.getByText(/Seamless Cloud Sync/i)).toBeDefined();
@@ -62,11 +63,12 @@ describe('GoogleLoginPage Component', () => {
       expect(screen.getByTestId('login-terms-link')).toBeDefined();
     });
 
-    it('allows entering and saving Google OAuth Client ID', () => {
+    it('allows entering and saving Google OAuth Client ID when developer settings are enabled', () => {
       render(
         <GoogleLoginPage
           user={null}
           googleClientId=""
+          showDeveloperSettings={true}
           onUpdateGoogleClientId={mockUpdateGoogleClientId}
           onLoginWithGoogle={mockLoginWithGoogle}
           onLogout={mockLogout}
@@ -92,11 +94,12 @@ describe('GoogleLoginPage Component', () => {
       );
     });
 
-    it('allows clearing the Google OAuth Client ID when configured', () => {
+    it('allows clearing the Google OAuth Client ID when configured with developer settings enabled', () => {
       render(
         <GoogleLoginPage
           user={null}
           googleClientId="active-client-id.apps.googleusercontent.com"
+          showDeveloperSettings={true}
           onUpdateGoogleClientId={mockUpdateGoogleClientId}
           onLoginWithGoogle={mockLoginWithGoogle}
           onLogout={mockLogout}
@@ -131,7 +134,7 @@ describe('GoogleLoginPage Component', () => {
       expect(mockLoginWithGoogle).toHaveBeenCalledTimes(1);
     });
 
-    it('validates custom Google email input and submits correctly', async () => {
+    it('validates custom Google email input and submits correctly when developer settings enabled', async () => {
       mockLoginWithGoogle.mockResolvedValueOnce(
         createGoogleUser({ name: 'Rachel Green', email: 'rachel@gmail.com' })
       );
@@ -139,6 +142,7 @@ describe('GoogleLoginPage Component', () => {
       render(
         <GoogleLoginPage
           user={null}
+          showDeveloperSettings={true}
           onLoginWithGoogle={mockLoginWithGoogle}
           onLogout={mockLogout}
           onSyncData={mockSyncData}

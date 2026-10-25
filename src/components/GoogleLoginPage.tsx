@@ -36,6 +36,7 @@ export interface GoogleLoginPageProps {
   isSyncing?: boolean;
   error?: string | null;
   googleClientId?: string;
+  showDeveloperSettings?: boolean;
   onUpdateGoogleClientId?: (clientId: string) => void;
   onCredentialResponse?: (response: GoogleCredentialResponse) => void;
   onLoginWithGoogle: (params?: {
@@ -62,6 +63,7 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
   isSyncing = false,
   error = null,
   googleClientId = '',
+  showDeveloperSettings = false,
   onUpdateGoogleClientId,
   onCredentialResponse,
   onLoginWithGoogle,
@@ -540,168 +542,173 @@ export const GoogleLoginPage: React.FC<GoogleLoginPageProps> = ({
             </span>
           </div>
 
-          {/* Google OAuth Client ID Configuration Box */}
-          <div className="client-id-config-card" data-testid="google-client-config-card">
-            <button
-              type="button"
-              className="btn-toggle-config"
-              onClick={() => setShowConfigPanel(!showConfigPanel)}
-              data-testid="toggle-client-config-btn"
-              aria-expanded={showConfigPanel}
-            >
-              <div className="config-toggle-title">
-                <span className="config-icon">⚙️</span>
-                <span>Google OAuth Client ID Settings</span>
-              </div>
-              <span className="config-status-tag">
-                {googleClientId ? 'Configured ✓' : 'Add Client ID'}
-              </span>
-            </button>
-
-            {showConfigPanel && (
-              <form
-                className="client-config-form"
-                onSubmit={handleSaveClientId}
-                data-testid="client-id-form"
-              >
-                <p className="config-instructions">
-                  Enter your Google Cloud Console OAuth 2.0 Web Client ID below, or configure it via{' '}
-                  <code>VITE_GOOGLE_CLIENT_ID</code> in your <code>.env</code> file.
-                </p>
-                <div className="form-group">
-                  <label htmlFor="client-id-input" className="form-label">
-                    Google OAuth Web Client ID
-                  </label>
-                  <input
-                    id="client-id-input"
-                    type="text"
-                    className="form-input client-id-input"
-                    placeholder="e.g. 123456789-abcdef.apps.googleusercontent.com"
-                    value={clientIdInput}
-                    onChange={(e) => setClientIdInput(e.target.value)}
-                    data-testid="client-id-input"
-                  />
-                </div>
-                <div className="config-actions-row">
-                  <button
-                    type="submit"
-                    className="btn-save-client-id"
-                    data-testid="btn-save-client-id"
-                  >
-                    Save Client ID
-                  </button>
-                  {googleClientId && (
-                    <button
-                      type="button"
-                      className="btn-clear-client-id"
-                      onClick={handleClearClientId}
-                      data-testid="btn-clear-client-id"
-                    >
-                      Clear
-                    </button>
-                  )}
-                  {clientSavedToast && (
-                    <span className="client-saved-toast" role="status">
-                      ✓ Client ID updated!
-                    </span>
-                  )}
-                </div>
-                <div className="google-setup-steps">
-                  <span className="setup-steps-title">Google Cloud Console Setup Checklist:</span>
-                  <ol className="setup-steps-list">
-                    <li>
-                      Go to{' '}
-                      <a
-                        href="https://console.cloud.google.com/apis/credentials"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="setup-external-link"
-                      >
-                        Google Cloud Console → APIs & Services → Credentials ↗
-                      </a>
-                    </li>
-                    <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong>.</li>
-                    <li>Select Application type: <strong>Web application</strong>.</li>
-                    <li>
-                      Under <strong>Authorized JavaScript origins</strong>, add:
-                      <br />
-                      <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
-                      <br />
-                      <small style={{ color: 'var(--color-text-muted)' }}>
-                        ⚠️ Do not include a trailing slash (e.g. <code>http://localhost:5173/</code> will fail).
-                      </small>
-                    </li>
-                    <li>
-                      Under <strong>Authorized redirect URIs</strong>, add:
-                      <br />
-                      <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
-                    </li>
-                    <li>Click <strong>Save</strong> and wait 1–2 minutes for Google's servers to propagate.</li>
-                    <li>Paste the generated Client ID above or into your local <code>.env</code> file.</li>
-                  </ol>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Direct Google Account Sign-In Form (for testing / manual email) */}
-          <div className="custom-account-expander">
-            <button
-              type="button"
-              className="btn-toggle-custom"
-              onClick={() => setShowEmailForm(!showEmailForm)}
-              data-testid="toggle-custom-form-btn"
-              aria-expanded={showEmailForm}
-            >
-              <span>{showEmailForm ? '▾' : '▸'} Sign in with specific Google account</span>
-            </button>
-
-            {showEmailForm && (
-              <form
-                className="custom-login-form"
-                onSubmit={handleEmailFormSubmit}
-                data-testid="custom-login-form"
-              >
-                <div className="form-group">
-                  <label htmlFor="custom-name-input" className="form-label">
-                    Full Name (optional)
-                  </label>
-                  <input
-                    id="custom-name-input"
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Alex Morgan"
-                    value={nameInput}
-                    onChange={(e) => setNameInput(e.target.value)}
-                    data-testid="custom-name-input"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="custom-email-input" className="form-label">
-                    Google Email Address
-                  </label>
-                  <input
-                    id="custom-email-input"
-                    type="email"
-                    className="form-input"
-                    placeholder="e.g. yourname@gmail.com"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    required
-                    data-testid="custom-email-input"
-                  />
-                </div>
+          {/* Optional Developer Settings: Hidden from display by default */}
+          {showDeveloperSettings && (
+            <>
+              {/* Google OAuth Client ID Configuration Box */}
+              <div className="client-id-config-card" data-testid="google-client-config-card">
                 <button
-                  type="submit"
-                  className="btn-custom-submit"
-                  disabled={isLoading}
-                  data-testid="btn-custom-submit"
+                  type="button"
+                  className="btn-toggle-config"
+                  onClick={() => setShowConfigPanel(!showConfigPanel)}
+                  data-testid="toggle-client-config-btn"
+                  aria-expanded={showConfigPanel}
                 >
-                  {isLoading ? 'Signing In...' : 'Sign In with Google'}
+                  <div className="config-toggle-title">
+                    <span className="config-icon">⚙️</span>
+                    <span>Google OAuth Client ID Settings</span>
+                  </div>
+                  <span className="config-status-tag">
+                    {googleClientId ? 'Configured ✓' : 'Add Client ID'}
+                  </span>
                 </button>
-              </form>
-            )}
-          </div>
+
+                {showConfigPanel && (
+                  <form
+                    className="client-config-form"
+                    onSubmit={handleSaveClientId}
+                    data-testid="client-id-form"
+                  >
+                    <p className="config-instructions">
+                      Enter your Google Cloud Console OAuth 2.0 Web Client ID below, or configure it via{' '}
+                      <code>VITE_GOOGLE_CLIENT_ID</code> in your <code>.env</code> file.
+                    </p>
+                    <div className="form-group">
+                      <label htmlFor="client-id-input" className="form-label">
+                        Google OAuth Web Client ID
+                      </label>
+                      <input
+                        id="client-id-input"
+                        type="text"
+                        className="form-input client-id-input"
+                        placeholder="e.g. 123456789-abcdef.apps.googleusercontent.com"
+                        value={clientIdInput}
+                        onChange={(e) => setClientIdInput(e.target.value)}
+                        data-testid="client-id-input"
+                      />
+                    </div>
+                    <div className="config-actions-row">
+                      <button
+                        type="submit"
+                        className="btn-save-client-id"
+                        data-testid="btn-save-client-id"
+                      >
+                        Save Client ID
+                      </button>
+                      {googleClientId && (
+                        <button
+                          type="button"
+                          className="btn-clear-client-id"
+                          onClick={handleClearClientId}
+                          data-testid="btn-clear-client-id"
+                        >
+                          Clear
+                        </button>
+                      )}
+                      {clientSavedToast && (
+                        <span className="client-saved-toast" role="status">
+                          ✓ Client ID updated!
+                        </span>
+                      )}
+                    </div>
+                    <div className="google-setup-steps">
+                      <span className="setup-steps-title">Google Cloud Console Setup Checklist:</span>
+                      <ol className="setup-steps-list">
+                        <li>
+                          Go to{' '}
+                          <a
+                            href="https://console.cloud.google.com/apis/credentials"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="setup-external-link"
+                          >
+                            Google Cloud Console → APIs & Services → Credentials ↗
+                          </a>
+                        </li>
+                        <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong>.</li>
+                        <li>Select Application type: <strong>Web application</strong>.</li>
+                        <li>
+                          Under <strong>Authorized JavaScript origins</strong>, add:
+                          <br />
+                          <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
+                          <br />
+                          <small style={{ color: 'var(--color-text-muted)' }}>
+                            ⚠️ Do not include a trailing slash (e.g. <code>http://localhost:5173/</code> will fail).
+                          </small>
+                        </li>
+                        <li>
+                          Under <strong>Authorized redirect URIs</strong>, add:
+                          <br />
+                          <code>http://localhost:5173</code> and <code>http://127.0.0.1:5173</code>
+                        </li>
+                        <li>Click <strong>Save</strong> and wait 1–2 minutes for Google's servers to propagate.</li>
+                        <li>Paste the generated Client ID above or into your local <code>.env</code> file.</li>
+                      </ol>
+                    </div>
+                  </form>
+                )}
+              </div>
+
+              {/* Direct Google Account Sign-In Form (for testing / manual email) */}
+              <div className="custom-account-expander">
+                <button
+                  type="button"
+                  className="btn-toggle-custom"
+                  onClick={() => setShowEmailForm(!showEmailForm)}
+                  data-testid="toggle-custom-form-btn"
+                  aria-expanded={showEmailForm}
+                >
+                  <span>{showEmailForm ? '▾' : '▸'} Sign in with specific Google account</span>
+                </button>
+
+                {showEmailForm && (
+                  <form
+                    className="custom-login-form"
+                    onSubmit={handleEmailFormSubmit}
+                    data-testid="custom-login-form"
+                  >
+                    <div className="form-group">
+                      <label htmlFor="custom-name-input" className="form-label">
+                        Full Name (optional)
+                      </label>
+                      <input
+                        id="custom-name-input"
+                        type="text"
+                        className="form-input"
+                        placeholder="e.g. Alex Morgan"
+                        value={nameInput}
+                        onChange={(e) => setNameInput(e.target.value)}
+                        data-testid="custom-name-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="custom-email-input" className="form-label">
+                        Google Email Address
+                      </label>
+                      <input
+                        id="custom-email-input"
+                        type="email"
+                        className="form-input"
+                        placeholder="e.g. yourname@gmail.com"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        required
+                        data-testid="custom-email-input"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn-custom-submit"
+                      disabled={isLoading}
+                      data-testid="btn-custom-submit"
+                    >
+                      {isLoading ? 'Signing In...' : 'Sign In with Google'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Value Proposition Highlights */}
           <div className="login-features-grid">
